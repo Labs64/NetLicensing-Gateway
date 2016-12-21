@@ -1,6 +1,6 @@
 <img src="http://netlicensing.io/img/netlicensing-stage-banner-01.png">
 
-# Labs64 NetLicensing / eCommerce integration gateway
+# Labs64 NetLicensing / eCommerce Gateway
 
 [Labs64 NetLicensing](http://netlicensing.io) is a first-class solution in the Licensing as a Service (LaaS) sector. Based on open standards, it provides a cost effective, integrated and scalable platform for software vendors and developers who want to concentrate on their product’s core functionality instead of spending resources on developing an own license management software.
 
