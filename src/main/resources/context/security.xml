@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:beans="http://www.springframework.org/schema/beans"
+             xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+          http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd">
+    <!-- use versionless XSD: http://stackoverflow.com/questions/20894695/spring-configuration-xml-schema-with-or-without-version -->
+
+    <global-method-security secured-annotations="enabled" />
+
+    <http auto-config="true" create-session="never" realm="Labs64 NetLicensing Gateway" request-matcher="regex" use-expressions="false">
+        <http-basic />
+        <csrf disabled="true"/>
+        <!-- The most specific patterns should come first, as they are tried in order -->
+        <intercept-url pattern="\A/myCommerce/keygen.*\Z" access="ROLE_VENDOR" />
+    </http>
+
+    <beans:bean id="forwardAuthenticationProvider"
+                class="com.labs64.netlicensing.gateway.util.ForwardAuthenticationProvider">
+    </beans:bean>
+
+    <authentication-manager erase-credentials="false">
+        <authentication-provider ref="forwardAuthenticationProvider" />
+    </authentication-manager>
+
+</beans:beans>
