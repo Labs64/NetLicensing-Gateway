@@ -7,15 +7,56 @@
         <artifactId>base</artifactId>
         <version>2.4.0-SNAPSHOT</version>
     </parent>
-
+    
+    <groupId>com.labs64.netlicensing</groupId>
     <artifactId>gateway</artifactId>
+    <version>2.4.0-SNAPSHOT</version>
     <packaging>war</packaging>
     <name>Labs64 :: NetLicensing :: Gateway</name>
+    <url>http://netlicensing.io</url>
+    <description>Labs64 NetLicensing Gateway</description>
+    <inceptionYear>2016</inceptionYear>
+
+    <organization>
+        <name>Labs64 GmbH</name>
+        <url>http://www.labs64.com</url>
+    </organization>
+
+    <licenses>
+        <license>
+            <name>Apache License 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+        <url>https://github.com/Labs64/NetLicensing-Gateway</url>
+        <connection>scm:git:git@github.com:Labs64/NetLicensing-Gateway.git</connection>
+        <developerConnection>scm:git:git@github.com:Labs64/NetLicensing-Gateway.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
+    <issueManagement>
+        <system>GitHub Issues</system>
+        <url>https://github.com/Labs64/NetLicensing-Gateway/issues</url>
+    </issueManagement>
+
+    <ciManagement>
+        <system>Travis CI</system>
+        <url>https://travis-ci.org/Labs64/NetLicensing-Gateway</url>
+    </ciManagement>
 
 	<properties>
+        <java.version>1.7</java.version>
+        <maven.version>3.0.5</maven.version>
         <gateway.PROJECT_STAGE>${enum.project-stage.development}</gateway.PROJECT_STAGE>
     </properties>
     
+    <prerequisites>
+        <maven>${maven.version}</maven>
+    </prerequisites>
+
     <dependencies>
         <!-- NLIC -->
         <dependency>
