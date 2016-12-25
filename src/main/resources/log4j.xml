@@ -2,19 +2,15 @@
 <!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
 <log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/" debug="false">
 
-    <appender name="nlic-console" class="org.apache.log4j.ConsoleAppender">
+    <appender name="gateway" class="org.apache.log4j.ConsoleAppender">
         <layout class="org.apache.log4j.EnhancedPatternLayout">
             <param name="conversionPattern" value="%d [%p] %m%n" />
         </layout>    
     </appender>
 
-    <!--
-    <appender name="nlic-null" class="org.apache.log4j.varia.NullAppender" />
-    -->
-    
     <root>
         <priority value="ERROR" />
-        <appender-ref ref="nlic-console" />
+        <appender-ref ref="nlic-gateway" />
     </root>
 
 </log4j:configuration>

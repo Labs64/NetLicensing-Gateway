@@ -1,4 +1,4 @@
-package com.labs64.netlicensing.gateway.util;
+package com.labs64.netlicensing.gateway.util.security;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
