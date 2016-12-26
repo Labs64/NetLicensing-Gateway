@@ -27,7 +27,7 @@ import com.labs64.netlicensing.service.LicenseeService;
 import com.labs64.netlicensing.service.ProductService;
 
 @Produces({ MediaType.TEXT_PLAIN })
-@Path("/myCommerce")
+@Path("/mycommerce")
 public class MyCommerceController extends AbstractBaseController {
 
     @POST

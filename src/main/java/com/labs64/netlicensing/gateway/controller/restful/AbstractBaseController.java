@@ -4,7 +4,7 @@ import javax.inject.Inject;
 
 import org.springframework.context.ApplicationContext;
 
-import com.labs64.netlicensing.gateway.util.SecurityHelper;
+import com.labs64.netlicensing.gateway.util.security.SecurityHelper;
 
 abstract class AbstractBaseController {
 
