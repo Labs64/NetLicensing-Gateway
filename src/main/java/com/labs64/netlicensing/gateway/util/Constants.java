@@ -14,6 +14,7 @@ public class Constants {
     public static final class myCommerce {
         public static final String ENDPOINT_PATH_KEYGEN = "keygen";
         public static final String LICENSE_TEMPLATE = "licenseTemplate";
+        public static final String PRODUCT_NUMBER = "productNumber";
 
         // myCommerce purchase id
         public static final String PURCHASE_ID = "PURCHASE_ID";

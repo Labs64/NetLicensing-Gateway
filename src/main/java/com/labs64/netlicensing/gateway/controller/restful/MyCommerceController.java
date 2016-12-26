@@ -1,12 +1,16 @@
 package com.labs64.netlicensing.gateway.controller.restful;
 
 import java.io.UnsupportedEncodingException;
+import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.BadRequestException;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 
@@ -27,36 +31,30 @@ import com.labs64.netlicensing.service.ProductService;
 public class MyCommerceController extends AbstractBaseController {
 
     @POST
-    @Path("/" + Constants.myCommerce.ENDPOINT_PATH_KEYGEN + "/{" + Constants.myCommerce.LICENSE_TEMPLATE + "}")
-    public String keygen(@PathParam(Constants.myCommerce.LICENSE_TEMPLATE) final String licenseTemplate,
+    @Path("/" + Constants.myCommerce.ENDPOINT_PATH_KEYGEN + "/{" + Constants.myCommerce.PRODUCT_NUMBER + "}" + "/{"
+            + Constants.myCommerce.LICENSE_TEMPLATE + "}")
+    public String keygen(@PathParam(Constants.myCommerce.PRODUCT_NUMBER) final String productNumber,
+            @PathParam(Constants.myCommerce.LICENSE_TEMPLATE) final String licenseTemplate,
+            @DefaultValue("false") @QueryParam("saveUserData") final boolean isSaveUserData,
             final MultivaluedMap<String, String> formParams)
-                    throws NetLicensingException, UnsupportedEncodingException {
+                    throws NetLicensingException, UnsupportedEncodingException, InterruptedException {
         final Context context = getSecurityHelper().getContext();
 
+
         if ((formParams != null)) {
-            final String product_id = formParams.getFirst(Constants.myCommerce.PRODUCT_ID);
-            final String lastname = (formParams.getFirst(Constants.myCommerce.LASTNAME) != null
-                    ? formParams.getFirst(Constants.myCommerce.LASTNAME) : "");
-            final String firstname = (formParams.getFirst(Constants.myCommerce.FIRSTNAME) != null
-                    ? formParams.getFirst(Constants.myCommerce.FIRSTNAME) : "");
-            final String email = (formParams.getFirst(Constants.myCommerce.EMAIL) != null
-                    ? formParams.getFirst(Constants.myCommerce.EMAIL) : "");
-
-            final Product product = ProductService.get(context, product_id);
+            final Product product = ProductService.get(context, productNumber);
             if (product != null) {
-                final Licensee newLicensee = new LicenseeImpl();
-                newLicensee.setActive(true);
-                newLicensee.setProduct(product);
-                newLicensee.addProperty(Constants.myCommerce.EMAIL, email);
-                newLicensee.addProperty(Constants.myCommerce.LASTNAME, lastname);
-                newLicensee.addProperty(Constants.myCommerce.FIRSTNAME, firstname);
-
-                final Licensee createdLicensee = LicenseeService.create(context, product_id, newLicensee);
+                Licensee licensee = new LicenseeImpl();
+                if (isSaveUserData) {
+                    licensee = addCustomPropertyToLicensee(formParams, licensee);
+                }
+                licensee.setActive(true);
+                licensee.setProduct(product);
+                final Licensee createdLicensee = LicenseeService.create(context, productNumber, licensee);
 
                 if (createdLicensee.getNumber() != null) {
                     final License newLicense = new LicenseImpl();
                     newLicense.setActive(true);
-
                     final License createdLicense = LicenseService.create(context, createdLicensee.getNumber(),
                             licenseTemplate, null, newLicense);
                     return createdLicense.getNumber();
@@ -69,5 +67,16 @@ public class MyCommerceController extends AbstractBaseController {
         } else {
             throw new BadRequestException("Incorrect data");
         }
+    }
+
+    private Licensee addCustomPropertyToLicensee(final MultivaluedMap<String, String> formParams,
+            final Licensee licensee) {
+        // Custom properties
+        for (final Map.Entry<String, List<String>> entry : formParams.entrySet()) {
+            if (!LicenseeImpl.getReservedProps().contains(entry.getKey()) && !entry.getValue().get(0).equals("")) {
+                licensee.addProperty(entry.getKey(), entry.getValue().get(0));
+            }
+        }
+        return licensee;
     }
 }
