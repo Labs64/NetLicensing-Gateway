@@ -39,15 +39,14 @@ public class MyCommerceController extends AbstractBaseController {
             @PathParam(Constants.myCommerce.LICENSE_TEMPLATE) final String licenseTemplate,
             @DefaultValue("false") @QueryParam("saveUserData") final boolean isSaveUserData,
             final MultivaluedMap<String, String> formParams)
-                    throws NetLicensingException, UnsupportedEncodingException, InterruptedException {
+                    throws UnsupportedEncodingException, InterruptedException {
         final Context context = getSecurityHelper().getContext();
 
-
-        if ((formParams != null)) {
+        if (!formParams.isEmpty()) {
             Licensee licensee = new LicenseeImpl();
-            final Product product = ProductService.get(context, productNumber);
-            if (product != null) {
-
+            Product product;
+            try {
+                product = ProductService.get(context, productNumber);
                 // get existing Licensee or create new
                 final String licenseeNumber = formParams.getFirst(Constants.myCommerce.LICENSEE_NUMBER);
                 if (StringUtils.isNotBlank(licenseeNumber)) {
@@ -74,7 +73,7 @@ public class MyCommerceController extends AbstractBaseController {
                 } else {
                     throw new BadRequestException("Incorrect Licensee");
                 }
-            } else {
+            } catch (final NetLicensingException e) {
                 throw new BadRequestException("Incorrect Product");
             }
         } else {
