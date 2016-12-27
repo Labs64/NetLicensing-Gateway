@@ -67,6 +67,8 @@ public class Constants {
         // Payment on invoice for purchase orders
         // Possible values: INVOICE="UNPAID" or "PAID"
         public static final String INVOICE = "INVOICE";
+        // custom field from myCommerce (licenseeNumber)
+        public static final String LICENSEE_NUMBER = "ADD[LICENSEENUMBER]";
 
     }
 }

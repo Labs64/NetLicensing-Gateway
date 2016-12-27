@@ -14,6 +14,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.labs64.netlicensing.domain.entity.License;
 import com.labs64.netlicensing.domain.entity.Licensee;
 import com.labs64.netlicensing.domain.entity.Product;
@@ -42,20 +44,31 @@ public class MyCommerceController extends AbstractBaseController {
 
 
         if ((formParams != null)) {
+            Licensee licensee = new LicenseeImpl();
             final Product product = ProductService.get(context, productNumber);
             if (product != null) {
-                Licensee licensee = new LicenseeImpl();
-                if (isSaveUserData) {
-                    licensee = addCustomPropertyToLicensee(formParams, licensee);
-                }
-                licensee.setActive(true);
-                licensee.setProduct(product);
-                final Licensee createdLicensee = LicenseeService.create(context, productNumber, licensee);
 
-                if (createdLicensee.getNumber() != null) {
+                // get existing Licensee or create new
+                final String licenseeNumber = formParams.getFirst(Constants.myCommerce.LICENSEE_NUMBER);
+                if (StringUtils.isNotBlank(licenseeNumber)) {
+                    licensee = LicenseeService.get(context, licenseeNumber);
+                    if (licensee == null) {
+                        throw new BadRequestException("Incorrect Licensee number");
+                    }
+                } else {
+                    if (isSaveUserData) {
+                        licensee = addCustomPropertyToLicensee(formParams, licensee);
+                    }
+                    licensee.setActive(true);
+                    licensee.setProduct(product);
+
+                    licensee = LicenseeService.create(context, productNumber, licensee);
+                }
+
+                if (licensee.getNumber() != null) {
                     final License newLicense = new LicenseImpl();
                     newLicense.setActive(true);
-                    final License createdLicense = LicenseService.create(context, createdLicensee.getNumber(),
+                    final License createdLicense = LicenseService.create(context, licensee.getNumber(),
                             licenseTemplate, null, newLicense);
                     return createdLicense.getNumber();
                 } else {
