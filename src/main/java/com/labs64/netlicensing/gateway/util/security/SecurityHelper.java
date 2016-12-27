@@ -15,6 +15,12 @@ import com.labs64.netlicensing.domain.vo.SecurityMode;
  */
 public final class SecurityHelper implements ApplicationContextAware {
 
+    static final String REST_API_PATH = "/core/v2/rest";
+    static final String BASE_URL_UNITTEST = "http://localhost:28080";
+    static final String BASE_URL_PROD = "https://go.netlicensing.io";
+
+    static final String BASE_URL = BASE_URL_UNITTEST + REST_API_PATH;
+
     private ApplicationContext springContext;
 
     @Override
@@ -24,7 +30,7 @@ public final class SecurityHelper implements ApplicationContextAware {
 
     public Context getContext() {
         final Context context = new Context();
-        context.setBaseUrl("http://localhost:28080/core/v2/rest");
+        context.setBaseUrl(BASE_URL);
         context.setSecurityMode(SecurityMode.BASIC_AUTHENTICATION);
 
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
