@@ -1,6 +1,7 @@
 package com.labs64.netlicensing.gateway.controller.restful;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +24,7 @@ import com.labs64.netlicensing.domain.entity.impl.LicenseImpl;
 import com.labs64.netlicensing.domain.entity.impl.LicenseeImpl;
 import com.labs64.netlicensing.domain.vo.Context;
 import com.labs64.netlicensing.exception.NetLicensingException;
+import com.labs64.netlicensing.gateway.domain.mycommerce.entity.StoredResponse;
 import com.labs64.netlicensing.gateway.util.Constants;
 import com.labs64.netlicensing.service.LicenseService;
 import com.labs64.netlicensing.service.LicenseeService;
@@ -41,35 +43,51 @@ public class MyCommerceController extends AbstractBaseController {
             final MultivaluedMap<String, String> formParams)
                     throws UnsupportedEncodingException, InterruptedException {
         final Context context = getSecurityHelper().getContext();
-
+        StoredResponse storedResponse = new StoredResponse();
         if (!formParams.isEmpty()) {
             Licensee licensee = new LicenseeImpl();
+
             Product product;
             try {
                 product = ProductService.get(context, productNumber);
                 // get existing Licensee or create new
                 final String licenseeNumber = formParams.getFirst(Constants.myCommerce.LICENSEE_NUMBER);
+                final String purchaseId = formParams.getFirst(Constants.myCommerce.PURCHASE_ID);
+                // if get LICENSEE_NUMBER from additional field
                 if (StringUtils.isNotBlank(licenseeNumber)) {
                     licensee = LicenseeService.get(context, licenseeNumber);
                     if (licensee == null) {
                         throw new BadRequestException("Incorrect Licensee number");
                     }
-                } else {
+                    // get from database
+                } else if (StringUtils.isNotBlank(purchaseId)) {
+                    storedResponse = getStoredResponseRepository().findFirstByPurchaseId(purchaseId);
+                    if (storedResponse != null) {
+                        licensee = LicenseeService.get(context, storedResponse.getLicenseeNumber());
+                        if (licensee == null) {
+                            throw new BadRequestException("Incorrect Licensee number");
+                        }
+                    }
+                }
+                // create new licensee
+                if (StringUtils.isBlank(licensee.getNumber())) {
                     if (isSaveUserData) {
                         licensee = addCustomPropertyToLicensee(formParams, licensee);
                     }
                     licensee.setActive(true);
                     licensee.setProduct(product);
-
                     licensee = LicenseeService.create(context, productNumber, licensee);
                 }
 
                 if (licensee.getNumber() != null) {
                     final License newLicense = new LicenseImpl();
                     newLicense.setActive(true);
-                    final License createdLicense = LicenseService.create(context, licensee.getNumber(),
-                            licenseTemplate, null, newLicense);
-                    return createdLicense.getNumber();
+                    LicenseService.create(context, licensee.getNumber(), licenseTemplate, null, newLicense);
+
+                    // save licensee number in database
+                    saveLicenseeToDatabase(licensee.getNumber(), purchaseId);
+
+                    return licensee.getNumber();
                 } else {
                     throw new BadRequestException("Incorrect Licensee");
                 }
@@ -79,6 +97,15 @@ public class MyCommerceController extends AbstractBaseController {
         } else {
             throw new BadRequestException("Incorrect data");
         }
+    }
+
+    private void saveLicenseeToDatabase(final String licenseeNumber, final String purchaseId) {
+        // save licensee number in database
+        final StoredResponse storedResponse = new StoredResponse();
+        storedResponse.setLicenseeNumber(licenseeNumber);
+        storedResponse.setPurchaseId(purchaseId);
+        storedResponse.setTimestamp(new Date());
+        getStoredResponseRepository().save(storedResponse);
     }
 
     private Licensee addCustomPropertyToLicensee(final MultivaluedMap<String, String> formParams,

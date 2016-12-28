@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xsi:schemaLocation="http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <!-- Instruct Spring to perform declarative transaction management automatically on annotated classes. for mode="aspectj"/ 
+        see SPR-6392 -->
+    <tx:annotation-driven />
+
+    <!-- Spring Data JPA: http://static.springsource.org/spring-data/data-jpa/docs/current/reference/html/ -->
+    <jpa:repositories base-package="com.labs64.netlicensing.gateway.domain.repositories" />
+
+    <!-- Transaction manager for a single JPA EntityManagerFactory (alternative to JTA) -->
+    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager"
+          p:entityManagerFactory-ref="entityManagerFactory" />
+
+    <jdbc:embedded-database id="dataSource" type="H2" />
+
+    <bean id="jpaAdapter" class="org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter"
+          p:databasePlatform="org.eclipse.persistence.platform.database.H2Platform"
+          p:generateDdl="true" />
+
+    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
+          p:dataSource-ref="dataSource" p:jpaVendorAdapter-ref="jpaAdapter"
+          p:persistenceXmlLocation="classpath:META-INF/persistence.xml">
+        <property name="jpaProperties">
+            <props>
+                <prop key="eclipselink.orm.throw.exceptions">true</prop>
+                <prop key="eclipselink.cache.shared.default">false</prop>
+                <prop key="eclipselink.jdbc.exclusive-connection.mode">Always</prop>
+                <prop key="eclipselink.ddl-generation">drop-and-create-tables</prop>
+                <prop key="eclipselink.ddl-generation.output-mode">database</prop>
+                <prop key="eclipselink.persistence-context.close-on-commit">true</prop>
+                <!-- JPA Logging; see also http://wiki.eclipse.org/EclipseLink/Examples/JPA/Logging -->
+                <prop key="eclipselink.logging.level">OFF</prop>
+                <prop key="eclipselink.logging.parameters">false</prop>
+                <!-- EclipseLink Weaving -->
+                <prop key="eclipselink.weaving">false</prop>
+            </props>
+        </property>
+    </bean>
+
+</beans>

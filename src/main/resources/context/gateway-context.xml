@@ -7,4 +7,6 @@
 
     <import resource="service.xml" />
 
+    <import resource="data.xml" />
+
 </beans>

@@ -67,6 +67,8 @@
         <log4j.version>1.2.17</log4j.version>
         <slf4j.version>1.7.21</slf4j.version>
         <junit.version>4.12</junit.version>
+        <h2database.version>1.4.191</h2database.version>
+        <eclipselink.version>2.6.0</eclipselink.version>
 
         <!-- plugin.version>0.0.0</plugin.version -->
         <maven-clean-plugin.version>3.0.0</maven-clean-plugin.version>
@@ -117,6 +119,20 @@
             <artifactId>spring-data-jpa</artifactId>
             <version>${spring-data-jpa.framework.version}</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>eclipselink</artifactId>
+            <scope>compile</scope>
+            <version>${eclipselink.version}</version>
+        </dependency>
+        
+        <!-- database -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>compile</scope>
+            <version>${h2database.version}</version>
         </dependency>
 
         <!-- jersey -->
