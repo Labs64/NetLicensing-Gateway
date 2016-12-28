@@ -4,6 +4,7 @@ import javax.inject.Inject;
 
 import org.springframework.context.ApplicationContext;
 
+import com.labs64.netlicensing.gateway.domain.repositories.CleanUpRepository;
 import com.labs64.netlicensing.gateway.domain.repositories.StoredResponseRepository;
 import com.labs64.netlicensing.gateway.util.security.SecurityHelper;
 
@@ -18,6 +19,9 @@ abstract class AbstractBaseController {
     @Inject
     private StoredResponseRepository storedResponseRepository;
 
+    @Inject
+    private CleanUpRepository cleanUpRepository;
+
     protected ApplicationContext getApplicationContext() {
         return applicationContext;
     }
@@ -28,5 +32,9 @@ abstract class AbstractBaseController {
 
     protected StoredResponseRepository getStoredResponseRepository() {
         return storedResponseRepository;
+    }
+
+    protected CleanUpRepository getCleanUpRepository() {
+        return cleanUpRepository;
     }
 }

@@ -4,6 +4,7 @@
   version="2.1">
   <persistence-unit name="nlicGateWayJPA" transaction-type="RESOURCE_LOCAL">
     <class>com.labs64.netlicensing.gateway.domain.mycommerce.entity.StoredResponse</class>
+    <class>com.labs64.netlicensing.gateway.domain.mycommerce.entity.CleanUp</class>
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
   </persistence-unit>
 </persistence>

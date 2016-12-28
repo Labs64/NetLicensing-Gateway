@@ -1,6 +1,7 @@
 package com.labs64.netlicensing.gateway.controller.restful;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ import com.labs64.netlicensing.domain.entity.impl.LicenseImpl;
 import com.labs64.netlicensing.domain.entity.impl.LicenseeImpl;
 import com.labs64.netlicensing.domain.vo.Context;
 import com.labs64.netlicensing.exception.NetLicensingException;
+import com.labs64.netlicensing.gateway.domain.mycommerce.entity.CleanUp;
 import com.labs64.netlicensing.gateway.domain.mycommerce.entity.StoredResponse;
 import com.labs64.netlicensing.gateway.util.Constants;
 import com.labs64.netlicensing.service.LicenseService;
@@ -87,6 +89,9 @@ public class MyCommerceController extends AbstractBaseController {
                     // save licensee number in database
                     saveLicenseeToDatabase(licensee.getNumber(), purchaseId);
 
+                    // check last clean up and clear
+                    checkLastCleanUpAndClear();
+
                     return licensee.getNumber();
                 } else {
                     throw new BadRequestException("Incorrect Licensee");
@@ -106,6 +111,28 @@ public class MyCommerceController extends AbstractBaseController {
         storedResponse.setPurchaseId(purchaseId);
         storedResponse.setTimestamp(new Date());
         getStoredResponseRepository().save(storedResponse);
+    }
+
+    private void checkLastCleanUpAndClear() {
+        // get last clean up
+        final CleanUp cleanUp = getCleanUpRepository().findFirstByOrderByTimestampDesc();
+        if (cleanUp != null) {
+            final int diffInHours = (int) (((new Date()).getTime() - cleanUp.getTimestamp().getTime())
+                    / (1000 * 60 * 60));
+
+            // clean
+            if (diffInHours > 1) {
+                final Calendar cal = Calendar.getInstance();
+                cal.setTime(new Date());
+                cal.add(Calendar.DAY_OF_MONTH, -3);
+                cal.getTime();
+                getStoredResponseRepository().deleteByTimestampBefore(cal.getTime());
+
+                // save last clean up
+                cleanUp.setTimestamp(new Date());
+                getCleanUpRepository().save(cleanUp);
+            }
+        }
     }
 
     private Licensee addCustomPropertyToLicensee(final MultivaluedMap<String, String> formParams,

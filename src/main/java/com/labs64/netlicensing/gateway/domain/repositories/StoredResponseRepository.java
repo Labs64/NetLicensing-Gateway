@@ -1,5 +1,7 @@
 package com.labs64.netlicensing.gateway.domain.repositories;
 
+import java.util.Date;
+
 import org.springframework.data.repository.CrudRepository;
 
 import com.labs64.netlicensing.gateway.domain.mycommerce.entity.StoredResponse;
@@ -11,4 +13,5 @@ public interface StoredResponseRepository extends CrudRepository<StoredResponse,
 
     StoredResponse findFirstByPurchaseId(String purchaseId);
 
+    StoredResponse deleteByTimestampBefore(Date time);
 }

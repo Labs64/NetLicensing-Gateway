@@ -14,39 +14,17 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
  * Represents database licensee property entity.
  */
 @Entity
-@Table(name = "MY_COMMERCE")
-public class StoredResponse extends AbstractPersistable<String> {
+@Table(name = "CLEAN_UP")
+public class CleanUp extends AbstractPersistable<String> {
 
-    private static final long serialVersionUID = 6805624114204054433L;
+    private static final long serialVersionUID = 642517696016632591L;
 
-    public StoredResponse() {
+    public CleanUp() {
     }
-
-    @Column(name = "LICENSEE_NUMBER", nullable = false)
-    private String licenseeNumber;
-
-    @Column(name = "PURCHASE_ID", nullable = true)
-    private String purchaseId;
 
     @Column(name = "TIMESTAMP", nullable = false)
     @Temporal(value = TemporalType.TIMESTAMP)
     private Date timestamp;
-
-    public String getLicenseeNumber() {
-        return licenseeNumber;
-    }
-
-    public void setLicenseeNumber(final String licenseeNumber) {
-        this.licenseeNumber = licenseeNumber;
-    }
-
-    public String getPurchaseId() {
-        return purchaseId;
-    }
-
-    public void setPurchaseId(final String purchaseId) {
-        this.purchaseId = purchaseId;
-    }
 
     public Date getTimestamp() {
         if (timestamp == null) {
@@ -69,10 +47,6 @@ public class StoredResponse extends AbstractPersistable<String> {
         final StringBuilder builder = new StringBuilder();
         builder.append("id=");
         builder.append(getId());
-        builder.append(", licenseeNumber=");
-        builder.append(getLicenseeNumber());
-        builder.append(", purchaseId=");
-        builder.append(getPurchaseId());
         builder.append(", timestamp=");
         builder.append(getTimestamp());
         return builder.toString();
