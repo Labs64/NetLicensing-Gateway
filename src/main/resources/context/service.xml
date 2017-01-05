@@ -5,6 +5,4 @@
 
     <bean id="securityHelper" class="com.labs64.netlicensing.gateway.util.security.SecurityHelper" />
 
-    <bean id="authenticationHelper" class="com.labs64.netlicensing.gateway.util.security.AuthenticationHelperImpl" />
-
 </beans>
