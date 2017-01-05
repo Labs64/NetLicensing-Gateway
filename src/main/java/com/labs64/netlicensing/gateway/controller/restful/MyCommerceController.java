@@ -110,23 +110,26 @@ public class MyCommerceController extends AbstractBaseController {
 
     private void checkLastCleanUpAndClean() {
         // get last clean up
-        final CleanUp cleanUp = getCleanUpRepository().findFirstByOrderByTimestampDesc();
+        CleanUp cleanUp = getCleanUpRepository().findFirstByOrderByTimestampDesc();
+        int diffInHours = 1;
         if (cleanUp != null) {
-            final int diffInHours = (int) (((new Date()).getTime() - cleanUp.getTimestamp().getTime())
-                    / (1000 * 60 * 60));
+            diffInHours = (int) (((new Date()).getTime() - cleanUp.getTimestamp().getTime()) / (1000 * 60 * 60));
+        }
+        // clean
+        if (diffInHours >= 1) {
+            final Calendar cal = Calendar.getInstance();
+            cal.setTime(new Date());
+            cal.add(Calendar.DATE, -3);
+            final Date dateBefore3Days = cal.getTime();
 
-            // clean
-            if (diffInHours > 1) {
-                final Calendar cal = Calendar.getInstance();
-                cal.setTime(new Date());
-                cal.add(Calendar.DAY_OF_MONTH, -3);
-                cal.getTime();
-                getStoredResponseRepository().deleteByTimestampBefore(cal.getTime());
+            getStoredResponseRepository().deleteByTimestampBefore(dateBefore3Days);
 
-                // save last clean up
-                cleanUp.setTimestamp(new Date());
-                getCleanUpRepository().save(cleanUp);
+            if (cleanUp == null) {
+                cleanUp = new CleanUp();
             }
+            // save last clean up
+            cleanUp.setTimestamp(new Date());
+            getCleanUpRepository().save(cleanUp);
         }
     }
 

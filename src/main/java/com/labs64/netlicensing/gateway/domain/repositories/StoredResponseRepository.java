@@ -2,6 +2,9 @@ package com.labs64.netlicensing.gateway.domain.repositories;
 
 import java.util.Date;
 
+import javax.persistence.TemporalType;
+
+import org.springframework.data.jpa.repository.Temporal;
 import org.springframework.data.repository.CrudRepository;
 
 import com.labs64.netlicensing.gateway.domain.mycommerce.entity.StoredResponse;
@@ -13,5 +16,5 @@ public interface StoredResponseRepository extends CrudRepository<StoredResponse,
 
     StoredResponse findFirstByPurchaseId(String purchaseId);
 
-    StoredResponse deleteByTimestampBefore(Date time);
+    void deleteByTimestampBefore(@Temporal(TemporalType.TIMESTAMP) Date date);
 }
