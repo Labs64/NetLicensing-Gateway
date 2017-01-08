@@ -23,3 +23,6 @@ bin/**
 hs_err_pid*
 
 target
+
+# OS X
+.DS_Store

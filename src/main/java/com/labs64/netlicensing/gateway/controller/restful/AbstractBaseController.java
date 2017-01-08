@@ -1,11 +1,13 @@
 package com.labs64.netlicensing.gateway.controller.restful;
 
+import java.util.Calendar;
+
 import javax.inject.Inject;
 
 import org.springframework.context.ApplicationContext;
 
-import com.labs64.netlicensing.gateway.domain.repositories.CleanUpRepository;
-import com.labs64.netlicensing.gateway.domain.repositories.StoredResponseRepository;
+import com.labs64.netlicensing.gateway.domain.entity.TimeStamp;
+import com.labs64.netlicensing.gateway.domain.repositories.TimeStampRepository;
 import com.labs64.netlicensing.gateway.util.security.SecurityHelper;
 
 abstract class AbstractBaseController {
@@ -17,10 +19,7 @@ abstract class AbstractBaseController {
     private SecurityHelper securityHelper;
 
     @Inject
-    private StoredResponseRepository storedResponseRepository;
-
-    @Inject
-    private CleanUpRepository cleanUpRepository;
+    private TimeStampRepository timeStampRepository;
 
     protected ApplicationContext getApplicationContext() {
         return applicationContext;
@@ -30,11 +29,20 @@ abstract class AbstractBaseController {
         return securityHelper;
     }
 
-    protected StoredResponseRepository getStoredResponseRepository() {
-        return storedResponseRepository;
+    protected boolean isTimeOutExpired(final String tsTag, final int timeOutMinutes) {
+        TimeStamp nextCheckTS = timeStampRepository.findOne(tsTag);
+        final Calendar now = Calendar.getInstance();
+        final boolean expired = (nextCheckTS == null) || (now.getTime().after(nextCheckTS.getTimestamp()));
+        if (expired) {
+            if (nextCheckTS == null) {
+                nextCheckTS = new TimeStamp(tsTag);
+            }
+            final Calendar nextCheck = Calendar.getInstance();
+            nextCheck.add(Calendar.MINUTE, timeOutMinutes);
+            nextCheckTS.setTimestamp(nextCheck.getTime());
+            timeStampRepository.save(nextCheckTS);
+        }
+        return expired;
     }
 
-    protected CleanUpRepository getCleanUpRepository() {
-        return cleanUpRepository;
-    }
 }

@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.POST;
@@ -18,6 +19,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.labs64.netlicensing.domain.entity.License;
 import com.labs64.netlicensing.domain.entity.Licensee;
@@ -26,8 +28,8 @@ import com.labs64.netlicensing.domain.entity.impl.LicenseImpl;
 import com.labs64.netlicensing.domain.entity.impl.LicenseeImpl;
 import com.labs64.netlicensing.domain.vo.Context;
 import com.labs64.netlicensing.exception.NetLicensingException;
-import com.labs64.netlicensing.gateway.domain.mycommerce.entity.CleanUp;
-import com.labs64.netlicensing.gateway.domain.mycommerce.entity.StoredResponse;
+import com.labs64.netlicensing.gateway.domain.entity.MyCommercePurchase;
+import com.labs64.netlicensing.gateway.domain.repositories.MyCommercePurchaseRepository;
 import com.labs64.netlicensing.gateway.util.Constants;
 import com.labs64.netlicensing.service.LicenseService;
 import com.labs64.netlicensing.service.LicenseTemplateService;
@@ -35,117 +37,97 @@ import com.labs64.netlicensing.service.LicenseeService;
 import com.labs64.netlicensing.service.ProductService;
 
 @Produces({ MediaType.TEXT_PLAIN })
-@Path("/mycommerce")
+@Path("/" + Constants.MyCommerce.ENDPOINT_BASE_PATH)
 public class MyCommerceController extends AbstractBaseController {
 
+    @Inject
+    private MyCommercePurchaseRepository myCommercePurchaseRepository;
+
     @POST
-    @Path("/" + Constants.myCommerce.ENDPOINT_PATH_KEYGEN + "/{" + Constants.myCommerce.PRODUCT_NUMBER + "}")
-    public String keygen(@PathParam(Constants.myCommerce.PRODUCT_NUMBER) final String productNumber,
-            @QueryParam("licenseTemplateNumber") final List<String> licenseTemplateList,
-            @DefaultValue("false") @QueryParam("saveUserData") final boolean isSaveUserData,
+    @Path("/" + Constants.MyCommerce.ENDPOINT_PATH_KEYGEN + "/{" + Constants.MyCommerce.PRODUCT_NUMBER + "}")
+    @Transactional
+    public String keygen(@PathParam(Constants.MyCommerce.PRODUCT_NUMBER) final String productNumber,
+            @QueryParam(Constants.MyCommerce.LICENSE_TEMPLATE_NUMBER) final List<String> licenseTemplateList,
+            @DefaultValue("false") @QueryParam(Constants.MyCommerce.SAVE_USER_DATA) final boolean isSaveUserData,
             final MultivaluedMap<String, String> formParams)
                     throws UnsupportedEncodingException, InterruptedException {
         final Context context = getSecurityHelper().getContext();
 
-        if (!formParams.isEmpty() && !licenseTemplateList.isEmpty()) {
-            Product product;
-            try {
-                // get product
-                product = ProductService.get(context, productNumber);
+        if (formParams.isEmpty() || licenseTemplateList.isEmpty()) {
+            // TODO(2K): more detailed check (e.g. what if 'ADD[LICENSEENUMBER]' is passed, but not 'PURCHASE_ID'?
+            throw new BadRequestException("Required parameters not provided");
+        }
 
-                // check licenseTemplate
-                checkLicenseTemplate(context, licenseTemplateList);
+        Product product;
+        try {
+            product = ProductService.get(context, productNumber);
+            checkLicenseTemplates(context, licenseTemplateList);
 
-                // get existing Licensee or create new
-                Licensee licensee = new LicenseeImpl();
-                final String licenseeNumber = formParams.getFirst(Constants.myCommerce.LICENSEE_NUMBER);
-                final String purchaseId = formParams.getFirst(Constants.myCommerce.PURCHASE_ID);
-                licensee = getExistingLicensee(context, licenseeNumber, purchaseId);
+            // try to get existing Licensee
+            final String licenseeNumber = formParams.getFirst(Constants.MyCommerce.LICENSEE_NUMBER);
+            final String purchaseId = formParams.getFirst(Constants.MyCommerce.PURCHASE_ID);
+            Licensee licensee = getExistingLicensee(context, licenseeNumber, purchaseId);
 
-                // create new Licensee
-                if (StringUtils.isBlank(licensee.getNumber())) {
-                    if (isSaveUserData) {
-                        licensee = addCustomPropertyToLicensee(formParams, licensee);
-                    }
-                    licensee.setActive(true);
-                    licensee.setProduct(product);
-                    licensee = LicenseeService.create(context, productNumber, licensee);
+            // create new Licensee, if not existing
+            if (licensee == null) {
+                licensee = new LicenseeImpl();
+                if (isSaveUserData) {
+                    addCustomPropertiesToLicensee(formParams, licensee);
                 }
-
-                if (licensee.getNumber() != null) {
-                    // create license
-                    final Iterator<String> licenseTemplateIterator = licenseTemplateList.iterator();
-                    while (licenseTemplateIterator.hasNext()) {
-                        final License newLicense = new LicenseImpl();
-                        newLicense.setActive(true);
-                        LicenseService.create(context, licensee.getNumber(), licenseTemplateIterator.next(), null,
-                                newLicense);
-                    }
-                    // save licensee number in database
-                    saveLicenseeToDatabase(licensee.getNumber(), purchaseId);
-
-                    // check last clean up and clean if need
-                    checkLastCleanUpAndClean();
-
-                    return licensee.getNumber();
-                } else {
-                    throw new BadRequestException("Incorrect Licensee");
-                }
-            } catch (final NetLicensingException e) {
-                throw new BadRequestException("Incorrect data");
+                licensee.setActive(true);
+                licensee.setProduct(product);
+                licensee = LicenseeService.create(context, productNumber, licensee);
             }
-        } else {
+
+            // create licenses
+            final Iterator<String> licenseTemplateIterator = licenseTemplateList.iterator();
+            while (licenseTemplateIterator.hasNext()) {
+                final License newLicense = new LicenseImpl();
+                newLicense.setActive(true);
+                // Required for timeVolume, no harm for other types. TODO(2K): remove once inconsistency resolved.
+                newLicense.addProperty(Constants.PROP_START_DATE, "now");
+                LicenseService.create(context, licensee.getNumber(), licenseTemplateIterator.next(), null,
+                        newLicense);
+            }
+
+            persistPurchaseLicenseeMapping(licensee.getNumber(), purchaseId);
+            removeExpiredPurchaseLicenseeMappings();
+
+            return licensee.getNumber();
+        } catch (final NetLicensingException e) {
             throw new BadRequestException("Incorrect data");
         }
     }
 
-    private void saveLicenseeToDatabase(final String licenseeNumber, final String purchaseId) {
-        // save licensee number in database
-        final StoredResponse storedResponse = new StoredResponse();
-        storedResponse.setLicenseeNumber(licenseeNumber);
-        storedResponse.setPurchaseId(purchaseId);
-        storedResponse.setTimestamp(new Date());
-        getStoredResponseRepository().save(storedResponse);
+    private void persistPurchaseLicenseeMapping(final String licenseeNumber, final String purchaseId) {
+        MyCommercePurchase myCommercePurchase = myCommercePurchaseRepository.findFirstByPurchaseId(purchaseId);
+        if (myCommercePurchase == null) {
+            myCommercePurchase = new MyCommercePurchase();
+            myCommercePurchase.setLicenseeNumber(licenseeNumber);
+            myCommercePurchase.setPurchaseId(purchaseId);
+        }
+        myCommercePurchase.setTimestamp(new Date());
+        myCommercePurchaseRepository.save(myCommercePurchase);
     }
 
-    private void checkLastCleanUpAndClean() {
-        // get last clean up
-        CleanUp cleanUp = getCleanUpRepository().findFirstByOrderByTimestampDesc();
-        int diffInHours = 1;
-        if (cleanUp != null) {
-            diffInHours = (int) (((new Date()).getTime() - cleanUp.getTimestamp().getTime()) / (1000 * 60 * 60));
-        }
-        // clean
-        if (diffInHours >= 1) {
-            final Calendar cal = Calendar.getInstance();
-            cal.setTime(new Date());
-            cal.add(Calendar.DATE, -3);
-            final Date dateBefore3Days = cal.getTime();
-
-            getStoredResponseRepository().deleteByTimestampBefore(dateBefore3Days);
-
-            if (cleanUp == null) {
-                cleanUp = new CleanUp();
-            }
-            // save last clean up
-            cleanUp.setTimestamp(new Date());
-            getCleanUpRepository().save(cleanUp);
+    private void removeExpiredPurchaseLicenseeMappings() {
+        if (isTimeOutExpired(Constants.MyCommerce.NEXT_CLEANUP_TAG, Constants.MyCommerce.CLEANUP_PERIOD_MINUTES)) {
+            final Calendar earliestPersistTime = Calendar.getInstance();
+            earliestPersistTime.add(Calendar.DATE, -Constants.MyCommerce.PERSIST_PURCHASE_DAYS);
+            myCommercePurchaseRepository.deleteByTimestampBefore(earliestPersistTime.getTime());
         }
     }
 
-    private Licensee addCustomPropertyToLicensee(final MultivaluedMap<String, String> formParams,
+    private void addCustomPropertiesToLicensee(final MultivaluedMap<String, String> formParams,
             final Licensee licensee) {
-        // Custom properties
         for (final Map.Entry<String, List<String>> entry : formParams.entrySet()) {
             if (!LicenseeImpl.getReservedProps().contains(entry.getKey()) && !entry.getValue().get(0).equals("")) {
                 licensee.addProperty(entry.getKey(), entry.getValue().get(0));
             }
         }
-        return licensee;
     }
 
-    private void checkLicenseTemplate(final Context context, final List<String> licenseTemplateList) {
-        // check licenseTemplate
+    private void checkLicenseTemplates(final Context context, final List<String> licenseTemplateList) {
         final Iterator<String> licenseTemplateIterator = licenseTemplateList.iterator();
         while (licenseTemplateIterator.hasNext()) {
             try {
@@ -156,27 +138,20 @@ public class MyCommerceController extends AbstractBaseController {
         }
     }
 
-    private Licensee getExistingLicensee(final Context context, final String licenseeNumber, final String purchaseId) {
-        StoredResponse storedResponse = new StoredResponse();
-        Licensee licensee = new LicenseeImpl();
-
-        // if LICENSEE_NUMBER from additional field
+    private Licensee getExistingLicensee(final Context context, String licenseeNumber, final String purchaseId) {
+        Licensee licensee = null;
+        if (StringUtils.isBlank(licenseeNumber)) { // ADD[LICENSEENUMBER] is not provided, get from database
+            final MyCommercePurchase myCommercePurchase = myCommercePurchaseRepository
+                    .findFirstByPurchaseId(purchaseId);
+            if (myCommercePurchase != null) {
+                licenseeNumber = myCommercePurchase.getLicenseeNumber();
+            }
+        }
         if (StringUtils.isNotBlank(licenseeNumber)) {
             try {
                 licensee = LicenseeService.get(context, licenseeNumber);
             } catch (final NetLicensingException e) {
-                throw new BadRequestException("Incorrect Licensee number");
-            }
-
-            // get from database
-        } else if (StringUtils.isNotBlank(purchaseId)) {
-            storedResponse = getStoredResponseRepository().findFirstByPurchaseId(purchaseId);
-            if (storedResponse != null) {
-                try {
-                    licensee = LicenseeService.get(context, storedResponse.getLicenseeNumber());
-                } catch (final NetLicensingException e) {
-                    throw new BadRequestException("Incorrect Licensee number");
-                }
+                throw new BadRequestException("Licensee number is not correct");
             }
         }
         return licensee;

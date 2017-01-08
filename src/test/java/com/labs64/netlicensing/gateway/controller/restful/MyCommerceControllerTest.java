@@ -12,12 +12,9 @@
  */
 package com.labs64.netlicensing.gateway.controller.restful;
 
-import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.rules.ExpectedException;
 
-import com.labs64.netlicensing.domain.vo.Context;
-import com.labs64.netlicensing.gateway.controller.restful.MyCommerceController;
 import com.labs64.netlicensing.service.LicenseService;
 
 /**
@@ -25,28 +22,8 @@ import com.labs64.netlicensing.service.LicenseService;
  */
 public class MyCommerceControllerTest extends BaseControllerTest {
 
-    private static final String LICENSEE_CUSTOM_PROPERTY = "CustomProperty";
-    private static final String LICENSEE_DELETING_PROPERTY = "toBeDeleted";
-
-    final String productNumber = "P001-TEST";
-    final String licenseeNumber = "L001-TEST";
-
-    // *** NLIC Tests ***
-
-    private static Context context;
-
     @Rule
     public ExpectedException thrown = ExpectedException.none();
-
-    @BeforeClass
-    public static void setup() {
-        context = createContext();
-    }
-
-    // @Test
-    // public void testCreateEmpty() {
-    // assertTrue("1", true);
-    // }
 
     @Override
     protected Class<?> getResourceClass() {

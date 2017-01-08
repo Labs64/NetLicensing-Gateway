@@ -7,14 +7,14 @@ import javax.persistence.TemporalType;
 import org.springframework.data.jpa.repository.Temporal;
 import org.springframework.data.repository.CrudRepository;
 
-import com.labs64.netlicensing.gateway.domain.mycommerce.entity.StoredResponse;
+import com.labs64.netlicensing.gateway.domain.entity.MyCommercePurchase;
 
 /**
- * Repository to manage {@link StoredResponse} instances.
+ * Repository to manage {@link MyCommercePurchase} instances.
  */
-public interface StoredResponseRepository extends CrudRepository<StoredResponse, String> {
+public interface MyCommercePurchaseRepository extends CrudRepository<MyCommercePurchase, String> {
 
-    StoredResponse findFirstByPurchaseId(String purchaseId);
+    MyCommercePurchase findFirstByPurchaseId(String purchaseId);
 
     void deleteByTimestampBefore(@Temporal(TemporalType.TIMESTAMP) Date date);
 }

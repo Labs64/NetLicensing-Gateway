@@ -1,8 +1,6 @@
 package com.labs64.netlicensing.gateway.util.security;
 
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
+import org.springframework.beans.factory.annotation.Required;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -13,29 +11,24 @@ import com.labs64.netlicensing.domain.vo.SecurityMode;
 /**
  * Utility class SecurityHelper contains helper methods for the Spring security context.
  */
-public final class SecurityHelper implements ApplicationContextAware {
+public final class SecurityHelper {
 
-    static final String REST_API_PATH = "/core/v2/rest";
-    static final String BASE_URL_UNITTEST = "http://localhost:28080";
-    static final String BASE_URL_PROD = "https://go.netlicensing.io";
+    private String nlicBaseUrl;
 
-    static final String BASE_URL = BASE_URL_UNITTEST + REST_API_PATH;
-
-    private ApplicationContext springContext;
-
-    @Override
-    public void setApplicationContext(final ApplicationContext applicationContext) throws BeansException {
-        springContext = applicationContext;
+    @Required
+    public void setCoreBaseUrl(final String coreBaseUrl) {
+        this.nlicBaseUrl = coreBaseUrl;
     }
 
     public Context getContext() {
         final Context context = new Context();
-        context.setBaseUrl(BASE_URL);
+        context.setBaseUrl(nlicBaseUrl);
         context.setSecurityMode(SecurityMode.BASIC_AUTHENTICATION);
 
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {
             if (authentication instanceof AnonymousAuthenticationToken) {
+                // TODO(2K): handle missing authentication (no cases so far)
                 context.setUsername("");
                 context.setPassword("");
             } else {

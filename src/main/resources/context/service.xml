@@ -3,6 +3,8 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
     <!-- use versionless XSD: http://stackoverflow.com/questions/20894695/spring-configuration-xml-schema-with-or-without-version -->
 
-    <bean id="securityHelper" class="com.labs64.netlicensing.gateway.util.security.SecurityHelper" />
+    <bean id="securityHelper" class="com.labs64.netlicensing.gateway.util.security.SecurityHelper">
+        <property name="coreBaseUrl" value="${core.base.url}" />
+    </bean>
 
 </beans>

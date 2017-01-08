@@ -3,6 +3,8 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
     <!-- use versionless XSD: http://stackoverflow.com/questions/20894695/spring-configuration-xml-schema-with-or-without-version -->
 
+    <import resource="config.xml" />
+
     <import resource="security.xml" />
 
     <import resource="service.xml" />

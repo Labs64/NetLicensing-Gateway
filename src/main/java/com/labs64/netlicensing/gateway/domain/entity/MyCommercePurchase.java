@@ -1,4 +1,4 @@
-package com.labs64.netlicensing.gateway.domain.mycommerce.entity;
+package com.labs64.netlicensing.gateway.domain.entity;
 
 import java.util.Date;
 
@@ -14,12 +14,12 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
  * Represents database licensee property entity.
  */
 @Entity
-@Table(name = "MY_COMMERCE")
-public class StoredResponse extends AbstractPersistable<String> {
+@Table(name = "MY_COMMERCE_PURCHASES")
+public class MyCommercePurchase extends AbstractPersistable<String> {
 
     private static final long serialVersionUID = 6805624114204054433L;
 
-    public StoredResponse() {
+    public MyCommercePurchase() {
     }
 
     @Column(name = "LICENSEE_NUMBER", nullable = false)

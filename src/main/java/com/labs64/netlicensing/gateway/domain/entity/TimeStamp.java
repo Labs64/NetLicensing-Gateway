@@ -1,25 +1,40 @@
-package com.labs64.netlicensing.gateway.domain.mycommerce.entity;
+package com.labs64.netlicensing.gateway.domain.entity;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-
-import org.springframework.data.jpa.domain.AbstractPersistable;
 
 /**
  * Represents database licensee property entity.
  */
 @Entity
-@Table(name = "CLEAN_UP")
-public class CleanUp extends AbstractPersistable<String> {
+@Table(name = "TIMSTAMPS")
+public class TimeStamp implements Serializable {
 
     private static final long serialVersionUID = 642517696016632591L;
 
-    public CleanUp() {
+    public TimeStamp() {
+    }
+
+    public TimeStamp(final String id) {
+        this.id = id;
+    }
+
+    @Id
+    private String id;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(final String id) {
+        this.id = id;
     }
 
     @Column(name = "TIMESTAMP", nullable = false)

@@ -3,8 +3,8 @@
   xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://www.oracle.com/webfolder/technetwork/jsc/xml/ns/persistence/persistence_2_1.xsd"
   version="2.1">
   <persistence-unit name="nlicGateWayJPA" transaction-type="RESOURCE_LOCAL">
-    <class>com.labs64.netlicensing.gateway.domain.mycommerce.entity.StoredResponse</class>
-    <class>com.labs64.netlicensing.gateway.domain.mycommerce.entity.CleanUp</class>
+    <class>com.labs64.netlicensing.gateway.domain.entity.MyCommercePurchase</class>
+    <class>com.labs64.netlicensing.gateway.domain.entity.TimeStamp</class>
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
   </persistence-unit>
 </persistence>
