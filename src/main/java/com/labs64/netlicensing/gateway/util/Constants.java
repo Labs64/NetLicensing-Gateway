@@ -48,7 +48,7 @@ public class Constants {
         public static final String STATE = "STATE";
         public static final String COUNTRY = "COUNTRY";
         /**
-         * <not present> = ISO-8859-1 (Latin 1) encoding<br/>
+         * (not present) = ISO-8859-1 (Latin 1) encoding<br>
          * "UTF8" = UTF8 Unicode
          */
         public static final String ENCODING = "ENCODING";
