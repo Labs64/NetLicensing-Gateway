@@ -44,7 +44,7 @@ public class MyCommerceController extends AbstractBaseController {
     private MyCommercePurchaseRepository myCommercePurchaseRepository;
 
     @POST
-    @Path("/" + Constants.MyCommerce.ENDPOINT_PATH_KEYGEN + "/{" + Constants.MyCommerce.PRODUCT_NUMBER + "}")
+    @Path("/" + Constants.MyCommerce.ENDPOINT_PATH_CODEGEN + "/{" + Constants.MyCommerce.PRODUCT_NUMBER + "}")
     @Transactional
     public String keygen(@PathParam(Constants.MyCommerce.PRODUCT_NUMBER) final String productNumber,
             @QueryParam(Constants.MyCommerce.LICENSE_TEMPLATE_NUMBER) final List<String> licenseTemplateList,

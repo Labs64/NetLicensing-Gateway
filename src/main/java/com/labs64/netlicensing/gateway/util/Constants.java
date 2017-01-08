@@ -14,7 +14,7 @@ public class Constants {
         public static final int PERSIST_PURCHASE_DAYS = 3;
 
         public static final String ENDPOINT_BASE_PATH = "mycommerce";
-        public static final String ENDPOINT_PATH_KEYGEN = "keygen";
+        public static final String ENDPOINT_PATH_CODEGEN = "codegen";
         public static final String PRODUCT_NUMBER = "productNumber";
         public static final String LICENSE_TEMPLATE_NUMBER = "licenseTemplateNumber";
         public static final String SAVE_USER_DATA = "saveUserData";
