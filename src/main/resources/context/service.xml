@@ -6,5 +6,9 @@
     <bean id="securityHelper" class="com.labs64.netlicensing.gateway.util.security.SecurityHelper">
         <property name="coreBaseUrl" value="${nlic.base.url}" />
     </bean>
+    
+    <bean id="exceptionMapper" class="com.labs64.netlicensing.gateway.controller.restful.exception.AppExceptionMapper"
+          scope="singleton">
+    </bean>
 
 </beans>

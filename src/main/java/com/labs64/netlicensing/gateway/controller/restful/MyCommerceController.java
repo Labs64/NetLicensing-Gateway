@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -28,6 +27,7 @@ import com.labs64.netlicensing.domain.entity.impl.LicenseImpl;
 import com.labs64.netlicensing.domain.entity.impl.LicenseeImpl;
 import com.labs64.netlicensing.domain.vo.Context;
 import com.labs64.netlicensing.exception.NetLicensingException;
+import com.labs64.netlicensing.gateway.controller.restful.exception.MyCommerceException;
 import com.labs64.netlicensing.gateway.domain.entity.MyCommercePurchase;
 import com.labs64.netlicensing.gateway.domain.repositories.MyCommercePurchaseRepository;
 import com.labs64.netlicensing.gateway.util.Constants;
@@ -50,53 +50,60 @@ public class MyCommerceController extends AbstractBaseController {
             @QueryParam(Constants.MyCommerce.LICENSE_TEMPLATE_NUMBER) final List<String> licenseTemplateList,
             @DefaultValue("false") @QueryParam(Constants.MyCommerce.SAVE_USER_DATA) final boolean isSaveUserData,
             final MultivaluedMap<String, String> formParams)
-                    throws UnsupportedEncodingException, InterruptedException {
+                    throws UnsupportedEncodingException, InterruptedException, MyCommerceException {
         final Context context = getSecurityHelper().getContext();
 
         if (formParams.isEmpty() || licenseTemplateList.isEmpty()) {
             // TODO(2K): more detailed check (e.g. what if 'ADD[LICENSEENUMBER]' is passed, but not 'PURCHASE_ID'?
-            throw new BadRequestException("Required parameters not provided");
+            throw new MyCommerceException("Required parameters not provided");
         }
 
         Product product;
         try {
             product = ProductService.get(context, productNumber);
-            checkLicenseTemplates(context, licenseTemplateList);
-
-            // try to get existing Licensee
-            final String licenseeNumber = formParams.getFirst(Constants.MyCommerce.LICENSEE_NUMBER);
-            final String purchaseId = formParams.getFirst(Constants.MyCommerce.PURCHASE_ID);
-            Licensee licensee = getExistingLicensee(context, licenseeNumber, purchaseId);
-
-            // create new Licensee, if not existing
-            if (licensee == null) {
-                licensee = new LicenseeImpl();
-                if (isSaveUserData) {
-                    addCustomPropertiesToLicensee(formParams, licensee);
-                }
-                licensee.setActive(true);
-                licensee.setProduct(product);
-                licensee = LicenseeService.create(context, productNumber, licensee);
-            }
-
-            // create licenses
-            final Iterator<String> licenseTemplateIterator = licenseTemplateList.iterator();
-            while (licenseTemplateIterator.hasNext()) {
-                final License newLicense = new LicenseImpl();
-                newLicense.setActive(true);
-                // Required for timeVolume, no harm for other types. TODO(2K): remove once inconsistency resolved.
-                newLicense.addProperty(Constants.PROP_START_DATE, "now");
-                LicenseService.create(context, licensee.getNumber(), licenseTemplateIterator.next(), null,
-                        newLicense);
-            }
-
-            persistPurchaseLicenseeMapping(licensee.getNumber(), purchaseId);
-            removeExpiredPurchaseLicenseeMappings();
-
-            return licensee.getNumber();
         } catch (final NetLicensingException e) {
-            throw new BadRequestException("Incorrect data");
+            throw new MyCommerceException(e.getMessage());
         }
+        checkLicenseTemplates(context, licenseTemplateList);
+
+        // try to get existing Licensee
+        final String licenseeNumber = formParams.getFirst(Constants.MyCommerce.LICENSEE_NUMBER);
+        final String purchaseId = formParams.getFirst(Constants.MyCommerce.PURCHASE_ID);
+        Licensee licensee = getExistingLicensee(context, licenseeNumber, purchaseId);
+
+        // create new Licensee, if not existing
+        if (licensee == null) {
+            licensee = new LicenseeImpl();
+            if (isSaveUserData) {
+                addCustomPropertiesToLicensee(formParams, licensee);
+            }
+            licensee.setActive(true);
+            licensee.setProduct(product);
+            try {
+                licensee = LicenseeService.create(context, productNumber, licensee);
+            } catch (final NetLicensingException e) {
+                throw new MyCommerceException(e.getMessage());
+            }
+        }
+
+        // create licenses
+        final Iterator<String> licenseTemplateIterator = licenseTemplateList.iterator();
+        while (licenseTemplateIterator.hasNext()) {
+            final License newLicense = new LicenseImpl();
+            newLicense.setActive(true);
+            // Required for timeVolume, no harm for other types. TODO(2K): remove once inconsistency resolved.
+            newLicense.addProperty(Constants.PROP_START_DATE, "now");
+            try {
+                LicenseService.create(context, licensee.getNumber(), licenseTemplateIterator.next(), null, newLicense);
+            } catch (final NetLicensingException e) {
+                throw new MyCommerceException(e.getMessage());
+            }
+        }
+
+        persistPurchaseLicenseeMapping(licensee.getNumber(), purchaseId);
+        removeExpiredPurchaseLicenseeMappings();
+
+        return licensee.getNumber();
     }
 
     private void persistPurchaseLicenseeMapping(final String licenseeNumber, final String purchaseId) {
@@ -127,18 +134,20 @@ public class MyCommerceController extends AbstractBaseController {
         }
     }
 
-    private void checkLicenseTemplates(final Context context, final List<String> licenseTemplateList) {
+    private void checkLicenseTemplates(final Context context, final List<String> licenseTemplateList)
+            throws MyCommerceException {
         final Iterator<String> licenseTemplateIterator = licenseTemplateList.iterator();
         while (licenseTemplateIterator.hasNext()) {
             try {
                 LicenseTemplateService.get(context, licenseTemplateIterator.next());
             } catch (final NetLicensingException e) {
-                throw new BadRequestException("Incorrect License Template");
+                throw new MyCommerceException(e.getMessage());
             }
         }
     }
 
-    private Licensee getExistingLicensee(final Context context, String licenseeNumber, final String purchaseId) {
+    private Licensee getExistingLicensee(final Context context, String licenseeNumber, final String purchaseId)
+            throws MyCommerceException {
         Licensee licensee = null;
         if (StringUtils.isBlank(licenseeNumber)) { // ADD[LICENSEENUMBER] is not provided, get from database
             final MyCommercePurchase myCommercePurchase = myCommercePurchaseRepository
@@ -151,9 +160,10 @@ public class MyCommerceController extends AbstractBaseController {
             try {
                 licensee = LicenseeService.get(context, licenseeNumber);
             } catch (final NetLicensingException e) {
-                throw new BadRequestException("Licensee number is not correct");
+                throw new MyCommerceException(e.getMessage());
             }
         }
         return licensee;
     }
+
 }
