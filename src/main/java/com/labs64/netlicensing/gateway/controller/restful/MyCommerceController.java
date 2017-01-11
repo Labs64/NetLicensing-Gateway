@@ -19,6 +19,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.labs64.netlicensing.domain.entity.License;
@@ -43,6 +45,8 @@ import com.labs64.netlicensing.service.ProductService;
 @Path("/" + Constants.MyCommerce.ENDPOINT_BASE_PATH)
 public class MyCommerceController extends AbstractBaseController {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(MyCommerceController.class);
+
     @Inject
     private MyCommercePurchaseRepository myCommercePurchaseRepository;
 
@@ -55,6 +59,8 @@ public class MyCommerceController extends AbstractBaseController {
             final MultivaluedMap<String, String> formParams)
                     throws UnsupportedEncodingException, InterruptedException, MyCommerceException {
         final Context context = getSecurityHelper().getContext();
+        LOGGER.info("Code Generator was started! With Product number: " + productNumber + ", licenseTemplateList: "
+                + licenseTemplateList.toString());
 
         if (formParams.isEmpty() || licenseTemplateList.isEmpty()) {
             // TODO(2K): more detailed check (e.g. what if 'ADD[LICENSEENUMBER]' is passed, but not 'PURCHASE_ID'?

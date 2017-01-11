@@ -9,6 +9,9 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.labs64.netlicensing.exception.ConversionException;
 import com.labs64.netlicensing.schema.context.Info;
 import com.labs64.netlicensing.schema.context.InfoEnum;
@@ -19,11 +22,15 @@ import com.labs64.netlicensing.schema.context.ObjectFactory;
 @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
 public class AppExceptionMapper implements ExceptionMapper<Throwable> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AppExceptionMapper.class);
+
     @Override
     public Response toResponse(final Throwable exception) {
         final ObjectFactory objectFactory = new ObjectFactory();
         final Netlicensing resp = objectFactory.createNetlicensing();
         resp.setInfos(objectFactory.createNetlicensingInfos());
+
+        LOGGER.trace(exception.getMessage(), exception);
 
         if (exception instanceof NotFoundException) {
             resp.getInfos().getInfo().add(new Info("Endpoint does not exist",

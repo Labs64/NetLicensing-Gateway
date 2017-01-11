@@ -5,12 +5,11 @@
     <appender name="gateway" class="org.apache.log4j.ConsoleAppender">
         <layout class="org.apache.log4j.EnhancedPatternLayout">
             <param name="conversionPattern" value="%d [%p] %m%n" />
-        </layout>    
+        </layout>
     </appender>
 
-    <root>
-        <priority value="ERROR" />
-        <appender-ref ref="nlic-gateway" />
-    </root>
-
+  <root> 
+    <priority value="info" /> 
+    <appender-ref ref="gateway" /> 
+  </root> 
 </log4j:configuration>
