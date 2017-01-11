@@ -74,8 +74,11 @@ public class MyCommerceController extends AbstractBaseController {
         final String purchaseId = formParams.getFirst(Constants.MyCommerce.PURCHASE_ID);
         Licensee licensee = getExistingLicensee(context, licenseeNumber, purchaseId);
 
+        // if license template and licensee are bound to different products, need to create new licensee
+        final boolean isNeedCreateNewLicensee = isNeedCreateNewLicensee(licensee, productNumber);
+
         // create new Licensee, if not existing
-        if (licensee == null) {
+        if (licensee == null || isNeedCreateNewLicensee) {
             licensee = new LicenseeImpl();
             if (isSaveUserData) {
                 addCustomPropertiesToLicensee(formParams, licensee);
@@ -107,6 +110,18 @@ public class MyCommerceController extends AbstractBaseController {
         removeExpiredPurchaseLicenseeMappings();
 
         return licensee.getNumber();
+    }
+
+    private boolean isNeedCreateNewLicensee(final Licensee licensee, final String productNumber) {
+        boolean isNeedCreateNewLicensee = false;
+        if (licensee != null) {
+            if (!licensee.getProduct().getNumber().equals(productNumber)) {
+                isNeedCreateNewLicensee = true;
+            }
+        } else {
+            isNeedCreateNewLicensee = true;
+        }
+        return isNeedCreateNewLicensee;
     }
 
     private void persistPurchaseLicenseeMapping(final String licenseeNumber, final String purchaseId) {
