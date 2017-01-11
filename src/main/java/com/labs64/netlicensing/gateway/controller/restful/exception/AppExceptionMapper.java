@@ -32,7 +32,7 @@ public class AppExceptionMapper implements ExceptionMapper<Throwable> {
         } else if (exception instanceof WebApplicationException) {
             resp.getInfos().getInfo().add(new Info("The specified method is not allowed",
                     String.valueOf(Response.Status.NOT_FOUND.getStatusCode()), InfoEnum.ERROR));
-            return Response.fromResponse(((javax.ws.rs.WebApplicationException) exception).getResponse())
+            return Response.fromResponse(((WebApplicationException) exception).getResponse())
                     .status(mapStatus(exception)).entity(resp).build();
         } else if (exception instanceof ConversionException) {
             resp.getInfos().getInfo().add(
