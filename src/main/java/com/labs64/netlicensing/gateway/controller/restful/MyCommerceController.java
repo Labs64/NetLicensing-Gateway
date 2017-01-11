@@ -3,6 +3,7 @@ package com.labs64.netlicensing.gateway.controller.restful;
 import java.io.UnsupportedEncodingException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -21,11 +22,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.labs64.netlicensing.domain.entity.License;
+import com.labs64.netlicensing.domain.entity.LicenseTemplate;
 import com.labs64.netlicensing.domain.entity.Licensee;
 import com.labs64.netlicensing.domain.entity.Product;
 import com.labs64.netlicensing.domain.entity.impl.LicenseImpl;
 import com.labs64.netlicensing.domain.entity.impl.LicenseeImpl;
 import com.labs64.netlicensing.domain.vo.Context;
+import com.labs64.netlicensing.domain.vo.LicenseType;
 import com.labs64.netlicensing.exception.NetLicensingException;
 import com.labs64.netlicensing.gateway.controller.restful.exception.MyCommerceException;
 import com.labs64.netlicensing.gateway.domain.entity.MyCommercePurchase;
@@ -64,7 +67,7 @@ public class MyCommerceController extends AbstractBaseController {
         } catch (final NetLicensingException e) {
             throw new MyCommerceException(e.getMessage());
         }
-        checkLicenseTemplates(context, licenseTemplateList);
+        final Map<String, LicenseTemplate> licenseTemplates = getLicenseTemplates(context, licenseTemplateList);
 
         // try to get existing Licensee
         final String licenseeNumber = formParams.getFirst(Constants.MyCommerce.LICENSEE_NUMBER);
@@ -87,19 +90,19 @@ public class MyCommerceController extends AbstractBaseController {
         }
 
         // create licenses
-        final Iterator<String> licenseTemplateIterator = licenseTemplateList.iterator();
-        while (licenseTemplateIterator.hasNext()) {
+        for (final LicenseTemplate licenseTemplate : licenseTemplates.values()) {
             final License newLicense = new LicenseImpl();
             newLicense.setActive(true);
-            // Required for timeVolume, no harm for other types. TODO(2K): remove once inconsistency resolved.
-            newLicense.addProperty(Constants.PROP_START_DATE, "now");
+            // Required for timeVolume.
+            if (LicenseType.TIMEVOLUME.equals(licenseTemplate.getLicenseType())) {
+                newLicense.addProperty(Constants.PROP_START_DATE, "now");
+            }
             try {
-                LicenseService.create(context, licensee.getNumber(), licenseTemplateIterator.next(), null, newLicense);
+                LicenseService.create(context, licensee.getNumber(), licenseTemplate.getNumber(), null, newLicense);
             } catch (final NetLicensingException e) {
                 throw new MyCommerceException(e.getMessage());
             }
         }
-
         persistPurchaseLicenseeMapping(licensee.getNumber(), purchaseId);
         removeExpiredPurchaseLicenseeMappings();
 
@@ -134,16 +137,21 @@ public class MyCommerceController extends AbstractBaseController {
         }
     }
 
-    private void checkLicenseTemplates(final Context context, final List<String> licenseTemplateList)
-            throws MyCommerceException {
+    private Map<String, LicenseTemplate> getLicenseTemplates(final Context context,
+            final List<String> licenseTemplateList)
+                    throws MyCommerceException {
+        final Map<String, LicenseTemplate> licenseTemplates = new HashMap<String, LicenseTemplate>();
         final Iterator<String> licenseTemplateIterator = licenseTemplateList.iterator();
         while (licenseTemplateIterator.hasNext()) {
             try {
-                LicenseTemplateService.get(context, licenseTemplateIterator.next());
+                final LicenseTemplate licenseTemplate = LicenseTemplateService.get(context,
+                        licenseTemplateIterator.next());
+                licenseTemplates.put(licenseTemplate.getNumber(), licenseTemplate);
             } catch (final NetLicensingException e) {
                 throw new MyCommerceException(e.getMessage());
             }
         }
+        return licenseTemplates;
     }
 
     private Licensee getExistingLicensee(final Context context, String licenseeNumber, final String purchaseId)
