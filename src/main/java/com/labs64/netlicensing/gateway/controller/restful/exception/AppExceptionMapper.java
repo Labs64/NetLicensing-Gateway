@@ -39,6 +39,8 @@ public class AppExceptionMapper implements ExceptionMapper<Throwable> {
                     new Info(exception.getCause().getMessage(), exception.getClass().getSimpleName(), InfoEnum.ERROR));
             return Response.status(mapStatus(exception)).entity(resp).build();
         } else {
+            resp.getInfos().getInfo().add(
+                    new Info(exception.toString(), exception.getClass().getSimpleName(), InfoEnum.ERROR));
             return Response.status(Response.Status.BAD_REQUEST).entity(resp).build();
         }
     }

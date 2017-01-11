@@ -39,7 +39,7 @@ import com.labs64.netlicensing.service.LicenseTemplateService;
 import com.labs64.netlicensing.service.LicenseeService;
 import com.labs64.netlicensing.service.ProductService;
 
-@Produces({ MediaType.TEXT_PLAIN })
+@Produces({ MediaType.TEXT_PLAIN, MediaType.APPLICATION_XML })
 @Path("/" + Constants.MyCommerce.ENDPOINT_BASE_PATH)
 public class MyCommerceController extends AbstractBaseController {
 
