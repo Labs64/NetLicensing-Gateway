@@ -28,6 +28,9 @@ public class MyCommercePurchase extends AbstractPersistable<String> {
     @Column(name = "PURCHASE_ID", nullable = true)
     private String purchaseId;
 
+    @Column(name = "PRODUCT_NUMBER", nullable = true)
+    private String productNumber;
+
     @Column(name = "TIMESTAMP", nullable = false)
     @Temporal(value = TemporalType.TIMESTAMP)
     private Date timestamp;
@@ -46,6 +49,14 @@ public class MyCommercePurchase extends AbstractPersistable<String> {
 
     public void setPurchaseId(final String purchaseId) {
         this.purchaseId = purchaseId;
+    }
+
+    public String getProductNumber() {
+        return productNumber;
+    }
+
+    public void setProductNumber(final String productNumber) {
+        this.productNumber = productNumber;
     }
 
     public Date getTimestamp() {

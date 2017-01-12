@@ -79,7 +79,7 @@ public class MyCommerceController extends AbstractBaseController {
         // try to get existing Licensee
         final String licenseeNumber = formParams.getFirst(Constants.MyCommerce.LICENSEE_NUMBER);
         final String purchaseId = formParams.getFirst(Constants.MyCommerce.PURCHASE_ID);
-        Licensee licensee = getExistingLicensee(context, licenseeNumber, purchaseId);
+        Licensee licensee = getExistingLicensee(context, licenseeNumber, purchaseId, productNumber);
 
         // if license template and licensee are bound to different products, need to create new licensee
         final boolean isNeedCreateNewLicensee = isNeedCreateNewLicensee(licensee, productNumber);
@@ -113,7 +113,7 @@ public class MyCommerceController extends AbstractBaseController {
                 throw new MyCommerceException(e.getMessage());
             }
         }
-        persistPurchaseLicenseeMapping(licensee.getNumber(), purchaseId);
+        persistPurchaseLicenseeMapping(licensee.getNumber(), purchaseId, productNumber);
         removeExpiredPurchaseLicenseeMappings();
 
         return licensee.getNumber();
@@ -131,12 +131,15 @@ public class MyCommerceController extends AbstractBaseController {
         return isNeedCreateNewLicensee;
     }
 
-    private void persistPurchaseLicenseeMapping(final String licenseeNumber, final String purchaseId) {
-        MyCommercePurchase myCommercePurchase = myCommercePurchaseRepository.findFirstByPurchaseId(purchaseId);
+    private void persistPurchaseLicenseeMapping(final String licenseeNumber, final String purchaseId,
+            final String productNumber) {
+        MyCommercePurchase myCommercePurchase = myCommercePurchaseRepository
+                .findFirstByPurchaseIdAndProductNumber(purchaseId, productNumber);
         if (myCommercePurchase == null) {
             myCommercePurchase = new MyCommercePurchase();
             myCommercePurchase.setLicenseeNumber(licenseeNumber);
             myCommercePurchase.setPurchaseId(purchaseId);
+            myCommercePurchase.setProductNumber(productNumber);
         }
         myCommercePurchase.setTimestamp(new Date());
         myCommercePurchaseRepository.save(myCommercePurchase);
@@ -176,12 +179,13 @@ public class MyCommerceController extends AbstractBaseController {
         return licenseTemplates;
     }
 
-    private Licensee getExistingLicensee(final Context context, String licenseeNumber, final String purchaseId)
+    private Licensee getExistingLicensee(final Context context, String licenseeNumber, final String purchaseId,
+            final String productNumber)
             throws MyCommerceException {
         Licensee licensee = null;
         if (StringUtils.isBlank(licenseeNumber)) { // ADD[LICENSEENUMBER] is not provided, get from database
             final MyCommercePurchase myCommercePurchase = myCommercePurchaseRepository
-                    .findFirstByPurchaseId(purchaseId);
+                    .findFirstByPurchaseIdAndProductNumber(purchaseId, productNumber);
             if (myCommercePurchase != null) {
                 licenseeNumber = myCommercePurchase.getLicenseeNumber();
                 LOGGER.info("licenseeNumber obtained from repository: " + licenseeNumber);

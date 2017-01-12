@@ -14,7 +14,7 @@ import com.labs64.netlicensing.gateway.domain.entity.MyCommercePurchase;
  */
 public interface MyCommercePurchaseRepository extends CrudRepository<MyCommercePurchase, String> {
 
-    MyCommercePurchase findFirstByPurchaseId(String purchaseId);
+    MyCommercePurchase findFirstByPurchaseIdAndProductNumber(String purchaseId, String productNumber);
 
     void deleteByTimestampBefore(@Temporal(TemporalType.TIMESTAMP) Date date);
 }
