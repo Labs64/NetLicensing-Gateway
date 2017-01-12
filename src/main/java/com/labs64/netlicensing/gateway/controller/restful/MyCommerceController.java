@@ -59,8 +59,9 @@ public class MyCommerceController extends AbstractBaseController {
             final MultivaluedMap<String, String> formParams)
                     throws UnsupportedEncodingException, InterruptedException, MyCommerceException {
         final Context context = getSecurityHelper().getContext();
-        LOGGER.info("Code Generator was started! With Product number: " + productNumber + ", licenseTemplateList: "
-                + licenseTemplateList.toString());
+        LOGGER.info("MyCommerce Code Generator was started! With Product number: " + productNumber
+                + ", licenseTemplateList: " + licenseTemplateList.toString() + ", formParams: "
+                + formParams.toString());
 
         if (formParams.isEmpty() || licenseTemplateList.isEmpty()) {
             // TODO(2K): more detailed check (e.g. what if 'ADD[LICENSEENUMBER]' is passed, but not 'PURCHASE_ID'?
@@ -183,6 +184,7 @@ public class MyCommerceController extends AbstractBaseController {
                     .findFirstByPurchaseId(purchaseId);
             if (myCommercePurchase != null) {
                 licenseeNumber = myCommercePurchase.getLicenseeNumber();
+                LOGGER.info("licenseeNumber obtained from repository: " + licenseeNumber);
             }
         }
         if (StringUtils.isNotBlank(licenseeNumber)) {
