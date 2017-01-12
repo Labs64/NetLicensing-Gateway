@@ -10,7 +10,7 @@ public abstract class GatewayException extends WebApplicationException {
     /**
      * Construct a <code>GatewayException</code> with the specified detail message.
      *
-     * @param msg
+     * @param response
      *            the detail message
      */
     public GatewayException(final Response response) {
