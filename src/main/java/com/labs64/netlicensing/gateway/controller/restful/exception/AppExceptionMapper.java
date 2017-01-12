@@ -13,42 +13,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.labs64.netlicensing.exception.ConversionException;
-import com.labs64.netlicensing.schema.context.Info;
-import com.labs64.netlicensing.schema.context.InfoEnum;
-import com.labs64.netlicensing.schema.context.Netlicensing;
-import com.labs64.netlicensing.schema.context.ObjectFactory;
 
 @Provider
-@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+@Produces({ MediaType.TEXT_PLAIN })
 public class AppExceptionMapper implements ExceptionMapper<Throwable> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AppExceptionMapper.class);
 
     @Override
     public Response toResponse(final Throwable exception) {
-        final ObjectFactory objectFactory = new ObjectFactory();
-        final Netlicensing resp = objectFactory.createNetlicensing();
-        resp.setInfos(objectFactory.createNetlicensingInfos());
-
         LOGGER.trace(exception.getMessage(), exception);
 
         if (exception instanceof NotFoundException) {
-            resp.getInfos().getInfo().add(new Info("Endpoint does not exist",
-                    String.valueOf(Response.Status.NOT_FOUND.getStatusCode()), InfoEnum.ERROR));
-            return Response.status(mapStatus(exception)).entity(resp).build();
+            return Response.status(mapStatus(exception)).entity("Endpoint does not exist").build();
         } else if (exception instanceof WebApplicationException) {
-            resp.getInfos().getInfo().add(new Info("The specified method is not allowed",
-                    String.valueOf(Response.Status.NOT_FOUND.getStatusCode()), InfoEnum.ERROR));
             return Response.fromResponse(((WebApplicationException) exception).getResponse())
-                    .status(mapStatus(exception)).entity(resp).build();
+                    .status(mapStatus(exception)).entity("The specified method is not allowed").build();
         } else if (exception instanceof ConversionException) {
-            resp.getInfos().getInfo().add(
-                    new Info(exception.getCause().getMessage(), exception.getClass().getSimpleName(), InfoEnum.ERROR));
-            return Response.status(mapStatus(exception)).entity(resp).build();
+            return Response.status(mapStatus(exception))
+                    .entity(exception.getClass().getSimpleName() + ": " + exception.getCause().getMessage()).build();
         } else {
-            resp.getInfos().getInfo().add(
-                    new Info(exception.toString(), exception.getClass().getSimpleName(), InfoEnum.ERROR));
-            return Response.status(Response.Status.BAD_REQUEST).entity(resp).build();
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(exception.getClass().getSimpleName() + ": " + exception.getCause().getMessage()).build();
         }
     }
 

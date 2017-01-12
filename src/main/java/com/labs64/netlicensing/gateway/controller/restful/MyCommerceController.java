@@ -41,7 +41,7 @@ import com.labs64.netlicensing.service.LicenseTemplateService;
 import com.labs64.netlicensing.service.LicenseeService;
 import com.labs64.netlicensing.service.ProductService;
 
-@Produces({ MediaType.TEXT_PLAIN, MediaType.APPLICATION_XML })
+@Produces({ MediaType.TEXT_PLAIN })
 @Path("/" + Constants.MyCommerce.ENDPOINT_BASE_PATH)
 public class MyCommerceController extends AbstractBaseController {
 
@@ -181,7 +181,7 @@ public class MyCommerceController extends AbstractBaseController {
 
     private Licensee getExistingLicensee(final Context context, String licenseeNumber, final String purchaseId,
             final String productNumber)
-            throws MyCommerceException {
+                    throws MyCommerceException {
         Licensee licensee = null;
         if (StringUtils.isBlank(licenseeNumber)) { // ADD[LICENSEENUMBER] is not provided, get from database
             final MyCommercePurchase myCommercePurchase = myCommercePurchaseRepository
