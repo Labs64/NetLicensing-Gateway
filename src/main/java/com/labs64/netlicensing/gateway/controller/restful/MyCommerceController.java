@@ -1,6 +1,5 @@
 package com.labs64.netlicensing.gateway.controller.restful;
 
-import java.io.UnsupportedEncodingException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -56,67 +55,59 @@ public class MyCommerceController extends AbstractBaseController {
     public String codeGenerator(@PathParam(Constants.MyCommerce.PRODUCT_NUMBER) final String productNumber,
             @QueryParam(Constants.MyCommerce.LICENSE_TEMPLATE_NUMBER) final List<String> licenseTemplateList,
             @DefaultValue("false") @QueryParam(Constants.MyCommerce.SAVE_USER_DATA) final boolean isSaveUserData,
-            final MultivaluedMap<String, String> formParams)
-                    throws UnsupportedEncodingException, InterruptedException, MyCommerceException {
-        final Context context = getSecurityHelper().getContext();
-        LOGGER.info("MyCommerce Code Generator was started! With Product number: " + productNumber
-                + ", licenseTemplateList: " + licenseTemplateList.toString() + ", formParams: "
-                + formParams.toString());
-
-        if (formParams.isEmpty() || licenseTemplateList.isEmpty()) {
-            // TODO(2K): more detailed check (e.g. what if 'ADD[LICENSEENUMBER]' is passed, but not 'PURCHASE_ID'?
-            throw new MyCommerceException("Required parameters not provided");
-        }
-
-        Product product;
+            final MultivaluedMap<String, String> formParams) {
         try {
-            product = ProductService.get(context, productNumber);
+            final Context context = getSecurityHelper().getContext();
+            LOGGER.info("MyCommerce Code Generator was started! With Product number: " + productNumber
+                    + ", licenseTemplateList: " + licenseTemplateList.toString() + ", formParams: "
+                    + formParams.toString());
+
+            if (formParams.isEmpty() || licenseTemplateList.isEmpty()) {
+                // TODO(2K): more detailed check (e.g. what if 'ADD[LICENSEENUMBER]' is passed, but not 'PURCHASE_ID'?
+                throw new MyCommerceException("Required parameters not provided");
+            }
+
+            final Product product = ProductService.get(context, productNumber);
+            final Map<String, LicenseTemplate> licenseTemplates = getLicenseTemplates(context, licenseTemplateList);
+
+            // try to get existing Licensee
+            final String licenseeNumber = formParams.getFirst(Constants.MyCommerce.LICENSEE_NUMBER);
+            final String purchaseId = formParams.getFirst(Constants.MyCommerce.PURCHASE_ID);
+            Licensee licensee = getExistingLicensee(context, licenseeNumber, purchaseId, productNumber);
+
+            // if license template and licensee are bound to different products, need to create new licensee
+            final boolean isNeedCreateNewLicensee = isNeedCreateNewLicensee(licensee, productNumber);
+
+            // create new Licensee, if not existing
+            if (licensee == null || isNeedCreateNewLicensee) {
+                licensee = new LicenseeImpl();
+                if (isSaveUserData) {
+                    addCustomPropertiesToLicensee(formParams, licensee);
+                }
+                licensee.setActive(true);
+                licensee.setProduct(product);
+                licensee = LicenseeService.create(context, productNumber, licensee);
+            }
+
+            // create licenses
+            for (final LicenseTemplate licenseTemplate : licenseTemplates.values()) {
+                final License newLicense = new LicenseImpl();
+                newLicense.setActive(true);
+                // Required for timeVolume.
+                if (LicenseType.TIMEVOLUME.equals(licenseTemplate.getLicenseType())) {
+                    newLicense.addProperty(Constants.PROP_START_DATE, "now");
+                }
+                LicenseService.create(context, licensee.getNumber(), licenseTemplate.getNumber(), null, newLicense);
+            }
+            persistPurchaseLicenseeMapping(licensee.getNumber(), purchaseId, productNumber);
+            removeExpiredPurchaseLicenseeMappings();
+
+            return licensee.getNumber();
         } catch (final NetLicensingException e) {
             throw new MyCommerceException(e.getMessage());
+        } catch (final Exception e) {
+            throw new MyCommerceException(e.getMessage());
         }
-        final Map<String, LicenseTemplate> licenseTemplates = getLicenseTemplates(context, licenseTemplateList);
-
-        // try to get existing Licensee
-        final String licenseeNumber = formParams.getFirst(Constants.MyCommerce.LICENSEE_NUMBER);
-        final String purchaseId = formParams.getFirst(Constants.MyCommerce.PURCHASE_ID);
-        Licensee licensee = getExistingLicensee(context, licenseeNumber, purchaseId, productNumber);
-
-        // if license template and licensee are bound to different products, need to create new licensee
-        final boolean isNeedCreateNewLicensee = isNeedCreateNewLicensee(licensee, productNumber);
-
-        // create new Licensee, if not existing
-        if (licensee == null || isNeedCreateNewLicensee) {
-            licensee = new LicenseeImpl();
-            if (isSaveUserData) {
-                addCustomPropertiesToLicensee(formParams, licensee);
-            }
-            licensee.setActive(true);
-            licensee.setProduct(product);
-            try {
-                licensee = LicenseeService.create(context, productNumber, licensee);
-            } catch (final NetLicensingException e) {
-                throw new MyCommerceException(e.getMessage());
-            }
-        }
-
-        // create licenses
-        for (final LicenseTemplate licenseTemplate : licenseTemplates.values()) {
-            final License newLicense = new LicenseImpl();
-            newLicense.setActive(true);
-            // Required for timeVolume.
-            if (LicenseType.TIMEVOLUME.equals(licenseTemplate.getLicenseType())) {
-                newLicense.addProperty(Constants.PROP_START_DATE, "now");
-            }
-            try {
-                LicenseService.create(context, licensee.getNumber(), licenseTemplate.getNumber(), null, newLicense);
-            } catch (final NetLicensingException e) {
-                throw new MyCommerceException(e.getMessage());
-            }
-        }
-        persistPurchaseLicenseeMapping(licensee.getNumber(), purchaseId, productNumber);
-        removeExpiredPurchaseLicenseeMappings();
-
-        return licensee.getNumber();
     }
 
     private boolean isNeedCreateNewLicensee(final Licensee licensee, final String productNumber) {
@@ -164,24 +155,20 @@ public class MyCommerceController extends AbstractBaseController {
 
     private Map<String, LicenseTemplate> getLicenseTemplates(final Context context,
             final List<String> licenseTemplateList)
-                    throws MyCommerceException {
+                    throws MyCommerceException, NetLicensingException {
         final Map<String, LicenseTemplate> licenseTemplates = new HashMap<String, LicenseTemplate>();
         final Iterator<String> licenseTemplateIterator = licenseTemplateList.iterator();
         while (licenseTemplateIterator.hasNext()) {
-            try {
-                final LicenseTemplate licenseTemplate = LicenseTemplateService.get(context,
-                        licenseTemplateIterator.next());
-                licenseTemplates.put(licenseTemplate.getNumber(), licenseTemplate);
-            } catch (final NetLicensingException e) {
-                throw new MyCommerceException(e.getMessage());
-            }
+            final LicenseTemplate licenseTemplate = LicenseTemplateService.get(context,
+                    licenseTemplateIterator.next());
+            licenseTemplates.put(licenseTemplate.getNumber(), licenseTemplate);
         }
         return licenseTemplates;
     }
 
     private Licensee getExistingLicensee(final Context context, String licenseeNumber, final String purchaseId,
             final String productNumber)
-                    throws MyCommerceException {
+                    throws MyCommerceException, NetLicensingException {
         Licensee licensee = null;
         if (StringUtils.isBlank(licenseeNumber)) { // ADD[LICENSEENUMBER] is not provided, get from database
             final MyCommercePurchase myCommercePurchase = myCommercePurchaseRepository
@@ -192,11 +179,7 @@ public class MyCommerceController extends AbstractBaseController {
             }
         }
         if (StringUtils.isNotBlank(licenseeNumber)) {
-            try {
-                licensee = LicenseeService.get(context, licenseeNumber);
-            } catch (final NetLicensingException e) {
-                throw new MyCommerceException(e.getMessage());
-            }
+            licensee = LicenseeService.get(context, licenseeNumber);
         }
         return licensee;
     }
