@@ -62,9 +62,13 @@ public class MyCommerceController extends AbstractBaseController {
                     + ", licenseTemplateList: " + licenseTemplateList.toString() + ", formParams: "
                     + formParams.toString());
 
+            final String quantity = formParams.getFirst(Constants.MyCommerce.QUANTITY);
+
             if (formParams.isEmpty() || licenseTemplateList.isEmpty()) {
                 // TODO(2K): more detailed check (e.g. what if 'ADD[LICENSEENUMBER]' is passed, but not 'PURCHASE_ID'?
                 throw new MyCommerceException("Required parameters not provided");
+            } else if (quantity == null || quantity.isEmpty() || Integer.parseInt(quantity) < 1) {
+                throw new MyCommerceException("Quantity is wrong");
             }
 
             final Product product = ProductService.get(context, productNumber);
@@ -91,13 +95,15 @@ public class MyCommerceController extends AbstractBaseController {
 
             // create licenses
             for (final LicenseTemplate licenseTemplate : licenseTemplates.values()) {
-                final License newLicense = new LicenseImpl();
-                newLicense.setActive(true);
-                // Required for timeVolume.
-                if (LicenseType.TIMEVOLUME.equals(licenseTemplate.getLicenseType())) {
-                    newLicense.addProperty(Constants.PROP_START_DATE, "now");
+                for (int i = 1; i <= Integer.parseInt(quantity); i++) {
+                    final License newLicense = new LicenseImpl();
+                    newLicense.setActive(true);
+                    // Required for timeVolume.
+                    if (LicenseType.TIMEVOLUME.equals(licenseTemplate.getLicenseType())) {
+                        newLicense.addProperty(Constants.PROP_START_DATE, "now");
+                    }
+                    LicenseService.create(context, licensee.getNumber(), licenseTemplate.getNumber(), null, newLicense);
                 }
-                LicenseService.create(context, licensee.getNumber(), licenseTemplate.getNumber(), null, newLicense);
             }
             persistPurchaseLicenseeMapping(licensee.getNumber(), purchaseId, productNumber);
             removeExpiredPurchaseLicenseeMappings();
