@@ -7,6 +7,10 @@ public class Constants {
 
     public static final String PROP_START_DATE = "startDate";
 
+    public static final class Monitoring {
+        public static final String ENDPOINT_BASE_PATH = "monitoring";
+    }
+
     public static final class MyCommerce {
         public static final String NEXT_CLEANUP_TAG = "MyCommerceNextCleanup";
         public static final int CLEANUP_PERIOD_MINUTES = 60;
