@@ -1,5 +1,6 @@
 package com.labs64.netlicensing.gateway.controller.restful;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -54,6 +55,7 @@ public class MyCommerceController extends AbstractBaseController {
     @Transactional
     public String codeGenerator(@PathParam(Constants.MyCommerce.PRODUCT_NUMBER) final String productNumber,
             @QueryParam(Constants.MyCommerce.LICENSE_TEMPLATE_NUMBER) final List<String> licenseTemplateList,
+            @DefaultValue("false") @QueryParam(Constants.MyCommerce.MULTIPLE_LICENSEE) final boolean multipleLicenseeMode,
             @DefaultValue("false") @QueryParam(Constants.MyCommerce.SAVE_USER_DATA) final boolean isSaveUserData,
             final MultivaluedMap<String, String> formParams) {
         try {
@@ -62,40 +64,45 @@ public class MyCommerceController extends AbstractBaseController {
                     + ", licenseTemplateList: " + licenseTemplateList.toString() + ", formParams: "
                     + formParams.toString());
 
+            final List<String> licensees = new ArrayList<String>();
             final String quantity = formParams.getFirst(Constants.MyCommerce.QUANTITY);
-
+            final String licenseeNumber = formParams.getFirst(Constants.MyCommerce.LICENSEE_NUMBER);
             if (formParams.isEmpty() || licenseTemplateList.isEmpty()) {
-                // TODO(2K): more detailed check (e.g. what if 'ADD[LICENSEENUMBER]' is passed, but not 'PURCHASE_ID'?
                 throw new MyCommerceException("Required parameters not provided");
+            } else if (multipleLicenseeMode && licenseeNumber != null && !licenseeNumber.isEmpty()) {
+                throw new MyCommerceException(
+                        "Wrong configuration! Multiple Licensee mode is on, LICENSEENUMBER is passed");
             } else if (quantity == null || quantity.isEmpty() || Integer.parseInt(quantity) < 1) {
                 throw new MyCommerceException("Quantity is wrong");
             }
 
             final Product product = ProductService.get(context, productNumber);
             final Map<String, LicenseTemplate> licenseTemplates = getLicenseTemplates(context, licenseTemplateList);
+            Licensee licensee = new LicenseeImpl();
+            boolean isNeedCreateNewLicensee = true;
 
-            // try to get existing Licensee
-            final String licenseeNumber = formParams.getFirst(Constants.MyCommerce.LICENSEE_NUMBER);
             final String purchaseId = formParams.getFirst(Constants.MyCommerce.PURCHASE_ID);
-            Licensee licensee = getExistingLicensee(context, licenseeNumber, purchaseId, productNumber);
-
-            // if license template and licensee are bound to different products, need to create new licensee
-            final boolean isNeedCreateNewLicensee = isNeedCreateNewLicensee(licensee, productNumber);
-
-            // create new Licensee, if not existing
-            if (licensee == null || isNeedCreateNewLicensee) {
-                licensee = new LicenseeImpl();
-                if (isSaveUserData) {
-                    addCustomPropertiesToLicensee(formParams, licensee);
-                }
-                licensee.setActive(true);
-                licensee.setProduct(product);
-                licensee = LicenseeService.create(context, productNumber, licensee);
+            // try to get existing Licensee
+            if (!multipleLicenseeMode) {
+                licensee = getExistingLicensee(context, licenseeNumber, purchaseId, productNumber);
+                // if license template and licensee are bound to different products, need to create new licensee
+                isNeedCreateNewLicensee = isNeedCreateNewLicensee(licensee, productNumber);
             }
 
             // create licenses
-            for (final LicenseTemplate licenseTemplate : licenseTemplates.values()) {
-                for (int i = 1; i <= Integer.parseInt(quantity); i++) {
+            for (int i = 1; i <= Integer.parseInt(quantity); i++) {
+                // create new Licensee, if not existing or multipleLicenseeMode
+                if (licensee == null || isNeedCreateNewLicensee || multipleLicenseeMode) {
+                    isNeedCreateNewLicensee = false;
+                    licensee = new LicenseeImpl();
+                    if (isSaveUserData) {
+                        addCustomPropertiesToLicensee(formParams, licensee);
+                    }
+                    licensee.setActive(true);
+                    licensee.setProduct(product);
+                    licensee = LicenseeService.create(context, productNumber, licensee);
+                }
+                for (final LicenseTemplate licenseTemplate : licenseTemplates.values()) {
                     final License newLicense = new LicenseImpl();
                     newLicense.setActive(true);
                     // Required for timeVolume.
@@ -104,11 +111,15 @@ public class MyCommerceController extends AbstractBaseController {
                     }
                     LicenseService.create(context, licensee.getNumber(), licenseTemplate.getNumber(), null, newLicense);
                 }
+                if (!licensees.contains(licensee.getNumber())) {
+                    licensees.add(licensee.getNumber());
+                }
             }
-            persistPurchaseLicenseeMapping(licensee.getNumber(), purchaseId, productNumber);
-            removeExpiredPurchaseLicenseeMappings();
-
-            return licensee.getNumber();
+            if (!multipleLicenseeMode) {
+                persistPurchaseLicenseeMapping(licensee.getNumber(), purchaseId, productNumber);
+                removeExpiredPurchaseLicenseeMappings();
+            }
+            return String.join(", ", licensees);
         } catch (final NetLicensingException e) {
             throw new MyCommerceException(e.getMessage());
         } catch (final Exception e) {
