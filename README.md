@@ -7,7 +7,7 @@
 [Labs64 NetLicensing](http://netlicensing.io) is a first-class solution in the Licensing as a Service (LaaS) sector. Based on open standards, it provides a cost effective, integrated and scalable platform for software vendors and developers who want to concentrate on their product’s core functionality instead of spending resources on developing an own license management software.
 
 ## License Acquisition Flow
-![NetLicensing / Gateway Integration How-To](http://netlicensing.io/img/netlicensing-promo-04.png)
+![NetLicensing / Gateway Integration How-To](https://raw.githubusercontent.com/wiki/Labs64/NetLicensing-Gateway/images/00_external-ecommerce-flow.png)
 
 ## Full Documentation
 
