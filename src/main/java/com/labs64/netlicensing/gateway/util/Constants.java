@@ -9,16 +9,20 @@ public class Constants {
 
     public static final class Monitoring {
         public static final String ENDPOINT_BASE_PATH = "monitoring";
+        public static final String PURCHASE_ID = "purchaseId";
     }
 
     public static final class MyCommerce {
         public static final String NEXT_CLEANUP_TAG = "MyCommerceNextCleanup";
+        public static final String NEXT_ERROR_LOG_CLEANUP_TAG = "MyCommerceNextErrorLogCleanup";
         public static final int CLEANUP_PERIOD_MINUTES = 60;
 
         public static final int PERSIST_PURCHASE_DAYS = 3;
+        public static final int PERSIST_ERROR_LOG_DAYS = 30;
 
         public static final String ENDPOINT_BASE_PATH = "mycommerce";
         public static final String ENDPOINT_PATH_CODEGEN = "codegen";
+        public static final String ENDPOINT_PATH_ERROR_LOG = "errorLog";
         public static final String PRODUCT_NUMBER = "productNumber";
         public static final String LICENSE_TEMPLATE_NUMBER = "licenseTemplateNumber";
         public static final String SAVE_USER_DATA = "saveUserData";

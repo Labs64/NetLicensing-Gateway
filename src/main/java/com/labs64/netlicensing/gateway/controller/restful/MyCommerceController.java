@@ -9,7 +9,9 @@ import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.print.attribute.standard.Severity;
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -33,7 +35,9 @@ import com.labs64.netlicensing.domain.vo.Context;
 import com.labs64.netlicensing.domain.vo.LicenseType;
 import com.labs64.netlicensing.exception.NetLicensingException;
 import com.labs64.netlicensing.gateway.controller.restful.exception.MyCommerceException;
+import com.labs64.netlicensing.gateway.domain.entity.Log;
 import com.labs64.netlicensing.gateway.domain.entity.MyCommercePurchase;
+import com.labs64.netlicensing.gateway.domain.repositories.LogRepository;
 import com.labs64.netlicensing.gateway.domain.repositories.MyCommercePurchaseRepository;
 import com.labs64.netlicensing.gateway.util.Constants;
 import com.labs64.netlicensing.service.LicenseService;
@@ -50,6 +54,9 @@ public class MyCommerceController extends AbstractBaseController {
     @Inject
     private MyCommercePurchaseRepository myCommercePurchaseRepository;
 
+    @Inject
+    private LogRepository logRepository;
+
     @POST
     @Path("/" + Constants.MyCommerce.ENDPOINT_PATH_CODEGEN + "/{" + Constants.MyCommerce.PRODUCT_NUMBER + "}")
     @Transactional
@@ -58,22 +65,28 @@ public class MyCommerceController extends AbstractBaseController {
             @DefaultValue("false") @QueryParam(Constants.MyCommerce.MULTIPLE_LICENSEE) final boolean multipleLicenseeMode,
             @DefaultValue("false") @QueryParam(Constants.MyCommerce.SAVE_USER_DATA) final boolean isSaveUserData,
             final MultivaluedMap<String, String> formParams) {
+        final String purchaseId = formParams.getFirst(Constants.MyCommerce.PURCHASE_ID);
         try {
             final Context context = getSecurityHelper().getContext();
-            LOGGER.info("MyCommerce Code Generator was started! With Product number: " + productNumber
-                    + ", licenseTemplateList: " + licenseTemplateList.toString() + ", formParams: "
-                    + formParams.toString());
+
+            logRequest(productNumber, licenseTemplateList, formParams);
 
             final List<String> licensees = new ArrayList<String>();
             final String quantity = formParams.getFirst(Constants.MyCommerce.QUANTITY);
             final String licenseeNumber = formParams.getFirst(Constants.MyCommerce.LICENSEE_NUMBER);
             if (formParams.isEmpty() || licenseTemplateList.isEmpty()) {
-                throw new MyCommerceException("Required parameters not provided");
+                final String errorMessage = "Required parameters not provided";
+                logException(errorMessage, purchaseId);
+                throw new MyCommerceException(errorMessage);
             } else if (multipleLicenseeMode && licenseeNumber != null && !licenseeNumber.isEmpty()) {
+                final String errorMessage = "Wrong configuration! Multiple Licensee mode is on, LICENSEENUMBER is passed";
+                logException(errorMessage, purchaseId);
                 throw new MyCommerceException(
-                        "Wrong configuration! Multiple Licensee mode is on, LICENSEENUMBER is passed");
+                        errorMessage);
             } else if (quantity == null || quantity.isEmpty() || Integer.parseInt(quantity) < 1) {
-                throw new MyCommerceException("Quantity is wrong");
+                final String errorMessage = "Quantity is wrong";
+                logException(errorMessage, purchaseId);
+                throw new MyCommerceException(errorMessage);
             }
 
             final Product product = ProductService.get(context, productNumber);
@@ -81,7 +94,6 @@ public class MyCommerceController extends AbstractBaseController {
             Licensee licensee = new LicenseeImpl();
             boolean isNeedCreateNewLicensee = true;
 
-            final String purchaseId = formParams.getFirst(Constants.MyCommerce.PURCHASE_ID);
             // try to get existing Licensee
             if (!multipleLicenseeMode) {
                 licensee = getExistingLicensee(context, licenseeNumber, purchaseId, productNumber);
@@ -121,10 +133,30 @@ public class MyCommerceController extends AbstractBaseController {
             }
             return String.join(", ", licensees);
         } catch (final NetLicensingException e) {
+            logException(e.getMessage(), purchaseId);
             throw new MyCommerceException(e.getMessage());
         } catch (final Exception e) {
+            logException(e.getMessage(), purchaseId);
             throw new MyCommerceException(e.getMessage());
         }
+    }
+
+    @GET
+    @Path("/" + Constants.MyCommerce.ENDPOINT_PATH_ERROR_LOG)
+    public String logging(@QueryParam(Constants.Monitoring.PURCHASE_ID) final String purchaseId) {
+        final Iterable<Log> logs = logRepository.findByKey(purchaseId);
+
+        final StringBuilder logStringBuilder = new StringBuilder();
+        int index = 0;
+        for (final Log log : logs) {
+            index++;
+            logStringBuilder.append(index + ". ");
+            logStringBuilder.append(log.getTimestamp() + ", ");
+            logStringBuilder.append("Severity: " + log.getSeverity() + ", ");
+            logStringBuilder.append("Message: " + log.getMessage());
+            logStringBuilder.append("\n");
+        }
+        return logStringBuilder.toString();
     }
 
     private boolean isNeedCreateNewLicensee(final Licensee licensee, final String productNumber) {
@@ -199,6 +231,45 @@ public class MyCommerceController extends AbstractBaseController {
             licensee = LicenseeService.get(context, licenseeNumber);
         }
         return licensee;
+    }
+
+    private void logRequest(final String productNumber, final List<String> licenseTemplateList,
+            final MultivaluedMap<String, String> formParams) {
+
+        final StringBuilder logStringBuilder = new StringBuilder();
+        logStringBuilder.append("MyCommerce Code Generator was started! With Product number: " + productNumber
+                + ", licenseTemplateList: " + licenseTemplateList.toString() + ", formParams: "
+                + formParams.toString());
+
+        LOGGER.info(logStringBuilder.toString());
+
+        final Log requestResponse = new Log();
+        requestResponse.setKey(formParams.getFirst(Constants.MyCommerce.PURCHASE_ID));
+        requestResponse.setSeverity(Severity.REPORT);
+        requestResponse.setMessage(logStringBuilder.toString());
+        requestResponse.setTimestamp(new Date());
+        logRepository.save(requestResponse);
+        removeExpiredErrorLogs();
+    }
+
+    private void logException(final String message, final String purchaseId) {
+
+        final Log requestResponse = new Log();
+        requestResponse.setKey(purchaseId);
+        requestResponse.setSeverity(Severity.ERROR);
+        requestResponse.setMessage(message);
+        requestResponse.setTimestamp(new Date());
+        logRepository.save(requestResponse);
+        removeExpiredErrorLogs();
+    }
+
+    private void removeExpiredErrorLogs() {
+        if (isTimeOutExpired(Constants.MyCommerce.NEXT_ERROR_LOG_CLEANUP_TAG,
+                Constants.MyCommerce.CLEANUP_PERIOD_MINUTES)) {
+            final Calendar earliestPersistTime = Calendar.getInstance();
+            earliestPersistTime.add(Calendar.DATE, -Constants.MyCommerce.PERSIST_ERROR_LOG_DAYS);
+            logRepository.deleteByTimestampBefore(earliestPersistTime.getTime());
+        }
     }
 
 }

@@ -84,6 +84,8 @@ public class MyCommercePurchase extends AbstractPersistable<String> {
         builder.append(getLicenseeNumber());
         builder.append(", purchaseId=");
         builder.append(getPurchaseId());
+        builder.append(", productNumber=");
+        builder.append(getProductNumber());
         builder.append(", timestamp=");
         builder.append(getTimestamp());
         return builder.toString();
