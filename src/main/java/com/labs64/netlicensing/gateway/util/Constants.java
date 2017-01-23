@@ -25,7 +25,7 @@ public class Constants {
         public static final String PRODUCT_NUMBER = "productNumber";
         public static final String LICENSE_TEMPLATE_NUMBER = "licenseTemplateNumber";
         public static final String SAVE_USER_DATA = "saveUserData";
-        public static final String MULTIPLE_LICENSEE = "multipleLicensee";
+        public static final String QUANTITY_TO_LICENSEE = "quantityToLicensee";
 
         /** myCommerce purchase id */
         public static final String PURCHASE_ID = "PURCHASE_ID";

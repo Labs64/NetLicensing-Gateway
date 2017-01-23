@@ -38,21 +38,20 @@ public class MyCommerceController extends AbstractBaseController {
     @Transactional
     public String codeGenerator(@PathParam(Constants.MyCommerce.PRODUCT_NUMBER) final String productNumber,
             @QueryParam(Constants.MyCommerce.LICENSE_TEMPLATE_NUMBER) final List<String> licenseTemplateList,
-            @DefaultValue("false") @QueryParam(Constants.MyCommerce.MULTIPLE_LICENSEE) final boolean multipleLicenseeMode,
+            @DefaultValue("false") @QueryParam(Constants.MyCommerce.QUANTITY_TO_LICENSEE) final boolean quantityToLicensee,
             @DefaultValue("false") @QueryParam(Constants.MyCommerce.SAVE_USER_DATA) final boolean isSaveUserData,
             final MultivaluedMap<String, String> formParams) {
 
         final String purchaseId = formParams.getFirst(Constants.MyCommerce.PURCHASE_ID);
 
         if (purchaseId == null) {
-            throw new MyCommerceException("'" + Constants.MyCommerce.PURCHASE_ID + "' parameter is not provided");
+            throw new MyCommerceException("'" + Constants.MyCommerce.PURCHASE_ID + "' is not provided");
         }
 
         try {
             final Context context = getSecurityHelper().getContext();
             return myCommerce.codeGenerator(context, purchaseId, productNumber, licenseTemplateList,
-                    multipleLicenseeMode,
-                    isSaveUserData, formParams);
+                    quantityToLicensee, isSaveUserData, formParams);
         } catch (final MyCommerceException e) {
             persistingLogger.log(purchaseId, StoredLog.Severity.ERROR, e.getResponse().getEntity().toString());
             throw e;

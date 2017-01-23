@@ -52,7 +52,7 @@ public class MyCommerce {
     private MyCommercePurchaseRepository myCommercePurchaseRepository;
 
     public String codeGenerator(final Context context, final String purchaseId, final String productNumber,
-            final List<String> licenseTemplateList, final boolean multipleLicenseeMode, final boolean isSaveUserData,
+            final List<String> licenseTemplateList, final boolean quantityToLicensee, final boolean isSaveUserData,
             final MultivaluedMap<String, String> formParams) throws NetLicensingException {
 
         final String logMessage = "Executing MyCommerce Code Generator for productNumber: " + productNumber
@@ -60,14 +60,18 @@ public class MyCommerce {
         persistingLogger.log(purchaseId, StoredLog.Severity.INFO, logMessage, LOGGER);
 
         final List<String> licensees = new ArrayList<>();
-        final String quantity = formParams.getFirst(Constants.MyCommerce.QUANTITY);
-        final String licenseeNumber = formParams.getFirst(Constants.MyCommerce.LICENSEE_NUMBER);
         if (formParams.isEmpty() || licenseTemplateList.isEmpty()) {
             throw new MyCommerceException("Required parameters not provided");
-        } else if (multipleLicenseeMode && licenseeNumber != null && !licenseeNumber.isEmpty()) {
-            throw new MyCommerceException("LICENSEENUMBER is not allowed when Multiple Licensee mode is on");
-        } else if (quantity == null || quantity.isEmpty() || Integer.parseInt(quantity) < 1) {
-            throw new MyCommerceException("Quantity is wrong");
+        }
+        final String licenseeNumber = formParams.getFirst(Constants.MyCommerce.LICENSEE_NUMBER);
+        if (quantityToLicensee && licenseeNumber != null && !licenseeNumber.isEmpty()) {
+            throw new MyCommerceException(
+                    "'" + Constants.MyCommerce.LICENSEE_NUMBER + "' is not allowed in '"
+                            + Constants.MyCommerce.QUANTITY_TO_LICENSEE + "' mode");
+        }
+        final String quantity = formParams.getFirst(Constants.MyCommerce.QUANTITY);
+        if (quantity == null || quantity.isEmpty() || Integer.parseInt(quantity) < 1) {
+            throw new MyCommerceException("'" + Constants.MyCommerce.QUANTITY + "' invalid or not provided");
         }
 
         final Product product = ProductService.get(context, productNumber);
@@ -76,7 +80,7 @@ public class MyCommerce {
         boolean isNeedCreateNewLicensee = true;
 
         // try to get existing Licensee
-        if (!multipleLicenseeMode) {
+        if (!quantityToLicensee) {
             licensee = getExistingLicensee(context, licenseeNumber, purchaseId, productNumber);
             // if license template and licensee are bound to different products, need to create new licensee
             isNeedCreateNewLicensee = isNeedCreateNewLicensee(licensee, productNumber);
@@ -85,7 +89,7 @@ public class MyCommerce {
         // create licenses
         for (int i = 1; i <= Integer.parseInt(quantity); i++) {
             // create new Licensee, if not existing or multipleLicenseeMode
-            if (licensee == null || isNeedCreateNewLicensee || multipleLicenseeMode) {
+            if (licensee == null || isNeedCreateNewLicensee || quantityToLicensee) {
                 isNeedCreateNewLicensee = false;
                 licensee = new LicenseeImpl();
                 if (isSaveUserData) {
@@ -108,7 +112,7 @@ public class MyCommerce {
                 licensees.add(licensee.getNumber());
             }
         }
-        if (!multipleLicenseeMode) {
+        if (!quantityToLicensee) {
             persistPurchaseLicenseeMapping(licensee.getNumber(), purchaseId, productNumber);
             removeExpiredPurchaseLicenseeMappings();
         }
