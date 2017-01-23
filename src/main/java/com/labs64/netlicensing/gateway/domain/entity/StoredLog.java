@@ -7,17 +7,20 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.print.attribute.standard.Severity;
 
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "LOGGING")
-public class Log extends AbstractPersistable<String> {
+public class StoredLog extends AbstractPersistable<String> {
 
     private static final long serialVersionUID = -8835218729902563568L;
 
-    public Log() {
+    public enum Severity {
+        INFO, WARNING, ERROR
+    }
+
+    public StoredLog() {
     }
 
     @Column(name = "KEY", nullable = true)
@@ -76,8 +79,8 @@ public class Log extends AbstractPersistable<String> {
     @Override
     public String toString() {
         final StringBuilder builder = new StringBuilder();
-        builder.append("id=");
-        builder.append(getId());
+        builder.append("key=");
+        builder.append(getKey());
         builder.append(", severity=");
         builder.append(getSeverity());
         builder.append(", message=");

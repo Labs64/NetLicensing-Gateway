@@ -20,6 +20,7 @@ import com.labs64.netlicensing.exception.NetLicensingException;
 import com.labs64.netlicensing.gateway.bl.PersistingLogger;
 import com.labs64.netlicensing.gateway.bl.mycommerce.MyCommerce;
 import com.labs64.netlicensing.gateway.controller.restful.exception.MyCommerceException;
+import com.labs64.netlicensing.gateway.domain.entity.StoredLog;
 import com.labs64.netlicensing.gateway.util.Constants;
 
 @Produces({ MediaType.TEXT_PLAIN })
@@ -53,20 +54,23 @@ public class MyCommerceController extends AbstractBaseController {
                     multipleLicenseeMode,
                     isSaveUserData, formParams);
         } catch (final MyCommerceException e) {
-            persistingLogger.logException(e.getMessage(), purchaseId);
+            persistingLogger.log(purchaseId, StoredLog.Severity.ERROR, e.getResponse().getEntity().toString());
             throw e;
         } catch (final NetLicensingException e) {
-            persistingLogger.logException(e.getMessage(), purchaseId);
+            persistingLogger.log(purchaseId, StoredLog.Severity.ERROR, e.getMessage());
             throw new MyCommerceException(e.getMessage());
         } catch (final Exception e) {
-            persistingLogger.logException(e.getMessage(), purchaseId);
+            persistingLogger.log(purchaseId, StoredLog.Severity.ERROR, e.getMessage());
             throw new MyCommerceException(e.getMessage());
         }
     }
 
     @GET
-    @Path("/" + Constants.MyCommerce.ENDPOINT_PATH_ERROR_LOG)
-    public String getErrorLog(@QueryParam(Constants.Monitoring.PURCHASE_ID) final String purchaseId) {
+    @Path("/" + Constants.MyCommerce.ENDPOINT_PATH_LOG)
+    public String getErrorLog(@QueryParam(Constants.MyCommerce.PURCHASE_ID) final String purchaseId) {
+        if (purchaseId == null) {
+            throw new MyCommerceException("'" + Constants.MyCommerce.PURCHASE_ID + "' parameter is not provided");
+        }
         return myCommerce.getErrorLog(purchaseId);
     }
 

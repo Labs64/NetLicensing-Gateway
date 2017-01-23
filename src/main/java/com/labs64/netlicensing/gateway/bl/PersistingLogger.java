@@ -5,22 +5,19 @@ import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.print.attribute.standard.Severity;
-import javax.ws.rs.core.MultivaluedMap;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.labs64.netlicensing.gateway.domain.entity.Log;
+import com.labs64.netlicensing.gateway.domain.entity.StoredLog;
 import com.labs64.netlicensing.gateway.domain.repositories.LogRepository;
 import com.labs64.netlicensing.gateway.util.Constants;
 
+// TODO(2K): turn into sink for slf4j
+
 @Component
 public class PersistingLogger {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(PersistingLogger.class);
 
     @Inject
     private LogRepository logRepository;
@@ -28,49 +25,42 @@ public class PersistingLogger {
     @Inject
     private TimeStampTracker timeStampTracker;
 
-    @Transactional
-    public void logRequest(final String productNumber, final List<String> licenseTemplateList,
-            final MultivaluedMap<String, String> formParams) {
-        final StringBuilder logStringBuilder = new StringBuilder();
-        logStringBuilder.append("MyCommerce Code Generator was started! With Product number: " + productNumber
-                + ", licenseTemplateList: " + licenseTemplateList.toString() + ", formParams: "
-                + formParams.toString());
-
-        LOGGER.info(logStringBuilder.toString());
-
-        final Log requestResponse = new Log();
-        requestResponse.setKey(formParams.getFirst(Constants.MyCommerce.PURCHASE_ID));
-        requestResponse.setSeverity(Severity.REPORT);
-        requestResponse.setMessage(logStringBuilder.toString());
-        requestResponse.setTimestamp(new Date());
-        logRepository.save(requestResponse);
-        removeExpiredErrorLogs();
+    public void log(final String key, final StoredLog.Severity severity, final String msg) {
+        log(key, severity, msg, null);
     }
 
     @Transactional
-    public void logException(final String message, final String key) {
-        final Log requestResponse = new Log();
+    public void log(final String key, final StoredLog.Severity severity, final String msg, final Logger logger) {
+        if (logger != null) {
+            switch (severity) {
+            case ERROR:
+                logger.error(msg);
+                break;
+            case WARNING:
+                logger.warn(msg);
+                break;
+            case INFO:
+                logger.info(msg);
+                break;
+            }
+        }
+        final StoredLog requestResponse = new StoredLog();
         requestResponse.setKey(key);
-        requestResponse.setSeverity(Severity.ERROR);
-        requestResponse.setMessage(message);
+        requestResponse.setSeverity(severity);
+        requestResponse.setMessage(msg);
         requestResponse.setTimestamp(new Date());
         logRepository.save(requestResponse);
-        removeExpiredErrorLogs();
-    }
 
-    @Transactional
-    public List<Log> getLogsByKey(final String key) {
-        return logRepository.findByKey(key);
-    }
-
-    @Transactional
-    private void removeExpiredErrorLogs() {
-        if (timeStampTracker.isTimeOutExpired(Constants.MyCommerce.NEXT_ERROR_LOG_CLEANUP_TAG,
-                Constants.MyCommerce.CLEANUP_PERIOD_MINUTES)) {
+        if (timeStampTracker.isTimeOutExpired(Constants.LOG_NEXT_CLEANUP_TAG, Constants.CLEANUP_PERIOD_MINUTES)) {
             final Calendar earliestPersistTime = Calendar.getInstance();
-            earliestPersistTime.add(Calendar.DATE, -Constants.MyCommerce.PERSIST_ERROR_LOG_DAYS);
+            earliestPersistTime.add(Calendar.DAY_OF_MONTH, -Constants.LOG_PERSIST_DAYS);
             logRepository.deleteByTimestampBefore(earliestPersistTime.getTime());
         }
+    }
+
+    @Transactional
+    public List<StoredLog> getLogsByKey(final String key) {
+        return logRepository.findByKey(key);
     }
 
 }

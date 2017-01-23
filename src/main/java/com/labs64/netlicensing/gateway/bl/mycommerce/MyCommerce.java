@@ -28,8 +28,8 @@ import com.labs64.netlicensing.exception.NetLicensingException;
 import com.labs64.netlicensing.gateway.bl.PersistingLogger;
 import com.labs64.netlicensing.gateway.bl.TimeStampTracker;
 import com.labs64.netlicensing.gateway.controller.restful.exception.MyCommerceException;
-import com.labs64.netlicensing.gateway.domain.entity.Log;
 import com.labs64.netlicensing.gateway.domain.entity.MyCommercePurchase;
+import com.labs64.netlicensing.gateway.domain.entity.StoredLog;
 import com.labs64.netlicensing.gateway.domain.repositories.MyCommercePurchaseRepository;
 import com.labs64.netlicensing.gateway.util.Constants;
 import com.labs64.netlicensing.service.LicenseService;
@@ -55,23 +55,19 @@ public class MyCommerce {
             final List<String> licenseTemplateList, final boolean multipleLicenseeMode, final boolean isSaveUserData,
             final MultivaluedMap<String, String> formParams) throws NetLicensingException {
 
-        persistingLogger.logRequest(productNumber, licenseTemplateList, formParams);
+        final String logMessage = "Executing MyCommerce Code Generator for productNumber: " + productNumber
+                + ", licenseTemplateList: " + licenseTemplateList.toString() + ", formParams: " + formParams.toString();
+        persistingLogger.log(purchaseId, StoredLog.Severity.INFO, logMessage, LOGGER);
 
         final List<String> licensees = new ArrayList<>();
         final String quantity = formParams.getFirst(Constants.MyCommerce.QUANTITY);
         final String licenseeNumber = formParams.getFirst(Constants.MyCommerce.LICENSEE_NUMBER);
         if (formParams.isEmpty() || licenseTemplateList.isEmpty()) {
-            final String errorMessage = "Required parameters not provided";
-            persistingLogger.logException(errorMessage, purchaseId);
-            throw new MyCommerceException(errorMessage);
+            throw new MyCommerceException("Required parameters not provided");
         } else if (multipleLicenseeMode && licenseeNumber != null && !licenseeNumber.isEmpty()) {
-            final String errorMessage = "Wrong configuration! Multiple Licensee mode is on, LICENSEENUMBER is passed";
-            persistingLogger.logException(errorMessage, purchaseId);
-            throw new MyCommerceException(errorMessage);
+            throw new MyCommerceException("LICENSEENUMBER is not allowed when Multiple Licensee mode is on");
         } else if (quantity == null || quantity.isEmpty() || Integer.parseInt(quantity) < 1) {
-            final String errorMessage = "Quantity is wrong";
-            persistingLogger.logException(errorMessage, purchaseId);
-            throw new MyCommerceException(errorMessage);
+            throw new MyCommerceException("Quantity is wrong");
         }
 
         final Product product = ProductService.get(context, productNumber);
@@ -120,17 +116,24 @@ public class MyCommerce {
     }
 
     public String getErrorLog(final String purchaseId) {
-        final Iterable<Log> logs = persistingLogger.getLogsByKey(purchaseId);
+        final List<StoredLog> logs = persistingLogger.getLogsByKey(purchaseId);
 
         final StringBuilder logStringBuilder = new StringBuilder();
-        int index = 0;
-        for (final Log log : logs) {
-            index++;
-            logStringBuilder.append(index + ". ");
-            logStringBuilder.append(log.getTimestamp() + ", ");
-            logStringBuilder.append("Severity: " + log.getSeverity() + ", ");
-            logStringBuilder.append("Message: " + log.getMessage());
-            logStringBuilder.append("\n");
+        if (logs.isEmpty()) {
+            logStringBuilder.append("No log entires for purchaseId '");
+            logStringBuilder.append(purchaseId);
+            logStringBuilder.append("' within last ");
+            logStringBuilder.append(Constants.LOG_PERSIST_DAYS);
+            logStringBuilder.append(" days.");
+        } else {
+            for (final StoredLog log : logs) {
+                logStringBuilder.append(log.getTimestamp());
+                logStringBuilder.append(" ");
+                logStringBuilder.append(log.getSeverity());
+                logStringBuilder.append(" ");
+                logStringBuilder.append(log.getMessage());
+                logStringBuilder.append("\n");
+            }
         }
         return logStringBuilder.toString();
     }
@@ -163,7 +166,7 @@ public class MyCommerce {
 
     private void removeExpiredPurchaseLicenseeMappings() {
         if (timeStampTracker.isTimeOutExpired(Constants.MyCommerce.NEXT_CLEANUP_TAG,
-                Constants.MyCommerce.CLEANUP_PERIOD_MINUTES)) {
+                Constants.CLEANUP_PERIOD_MINUTES)) {
             final Calendar earliestPersistTime = Calendar.getInstance();
             earliestPersistTime.add(Calendar.DATE, -Constants.MyCommerce.PERSIST_PURCHASE_DAYS);
             myCommercePurchaseRepository.deleteByTimestampBefore(earliestPersistTime.getTime());
