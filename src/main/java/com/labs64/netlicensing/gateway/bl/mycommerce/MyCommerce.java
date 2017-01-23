@@ -120,9 +120,11 @@ public class MyCommerce {
 
         final StringBuilder logStringBuilder = new StringBuilder();
         if (logs.isEmpty()) {
-            logStringBuilder.append("No log entires for purchaseId '");
+            logStringBuilder.append("No log entires for ");
+            logStringBuilder.append(Constants.MyCommerce.PURCHASE_ID);
+            logStringBuilder.append("=");
             logStringBuilder.append(purchaseId);
-            logStringBuilder.append("' within last ");
+            logStringBuilder.append(" within last ");
             logStringBuilder.append(Constants.LOG_PERSIST_DAYS);
             logStringBuilder.append(" days.");
         } else {
