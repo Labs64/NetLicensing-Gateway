@@ -6,6 +6,7 @@
     <bean id="propertyConfigurer" class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
         <property name="locations">
             <list>
+                <value>classpath*:application.properties</value>
                 <value>classpath*:gateway-default.properties</value>
                 <value>classpath*:gateway.properties</value>
             </list>

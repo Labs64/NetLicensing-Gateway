@@ -14,10 +14,22 @@ import com.labs64.netlicensing.domain.vo.SecurityMode;
 public final class SecurityHelper {
 
     private String nlicBaseUrl;
+    private String nlicDemoUser;
+    private String nlicDemoPass;
 
     @Required
-    public void setCoreBaseUrl(final String coreBaseUrl) {
-        this.nlicBaseUrl = coreBaseUrl;
+    public void setNlicBaseUrl(final String nlicBaseUrl) {
+        this.nlicBaseUrl = nlicBaseUrl;
+    }
+
+    @Required
+    public void setNlicDemoUser(final String nlicDemoUser) {
+        this.nlicDemoUser = nlicDemoUser;
+    }
+
+    @Required
+    public void setNlicDemoPass(final String nlicDemoPass) {
+        this.nlicDemoPass = nlicDemoPass;
     }
 
     public Context getContext() {
@@ -36,6 +48,15 @@ public final class SecurityHelper {
                 context.setPassword(authentication.getCredentials().toString());
             }
         }
+        return context;
+    }
+
+    public Context getDemoContext() {
+        final Context context = new Context();
+        context.setBaseUrl(nlicBaseUrl);
+        context.setSecurityMode(SecurityMode.BASIC_AUTHENTICATION);
+        context.setUsername(nlicDemoUser);
+        context.setPassword(nlicDemoPass);
         return context;
     }
 

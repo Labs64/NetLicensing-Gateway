@@ -13,6 +13,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.labs64.netlicensing.domain.vo.Context;
@@ -23,6 +24,7 @@ import com.labs64.netlicensing.gateway.controller.restful.exception.MyCommerceEx
 import com.labs64.netlicensing.gateway.domain.entity.StoredLog;
 import com.labs64.netlicensing.gateway.util.Constants;
 
+@Component
 @Produces({ MediaType.TEXT_PLAIN })
 @Path("/" + Constants.MyCommerce.ENDPOINT_BASE_PATH)
 public class MyCommerceController extends AbstractBaseController {
