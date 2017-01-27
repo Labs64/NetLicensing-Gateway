@@ -56,32 +56,18 @@
     </filter-mapping>
 
     <servlet>
-        <servlet-name>netlicensingServlet</servlet-name>
+        <servlet-name>netlicensingGateway</servlet-name>
         <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
         <init-param>
             <param-name>jersey.config.server.provider.packages</param-name>
             <param-value>com.labs64.netlicensing.gateway.controller.restful</param-value>
         </init-param>
-        <init-param>
-            <param-name>jersey.config.server.provider.classnames</param-name>
-            <param-value>org.glassfish.jersey.jackson.JacksonFeature;org.glassfish.jersey.filter.LoggingFilter</param-value>
-        </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
 
-    <servlet>
-        <servlet-name>loggingConsole</servlet-name>
-        <servlet-class>it.openutils.log4j.Log4jConfigurationServlet</servlet-class>
-    </servlet>
-
     <servlet-mapping>
-        <servlet-name>netlicensingServlet</servlet-name>
+        <servlet-name>netlicensingGateway</servlet-name>
         <url-pattern>/*</url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
-        <servlet-name>loggingConsole</servlet-name>
-        <url-pattern>/internal/logging</url-pattern>
     </servlet-mapping>
 
 </web-app>

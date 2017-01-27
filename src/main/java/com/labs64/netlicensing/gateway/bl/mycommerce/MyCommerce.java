@@ -121,7 +121,7 @@ public class MyCommerce {
 
     public String getErrorLog(final Context context, final String productNumber, final String purchaseId)
             throws NetLicensingException {
-        final Product product = ProductService.get(context, productNumber);
+        ProductService.get(context, productNumber);// dummy request
 
         List<StoredLog> logs = new ArrayList<StoredLog>();
 
