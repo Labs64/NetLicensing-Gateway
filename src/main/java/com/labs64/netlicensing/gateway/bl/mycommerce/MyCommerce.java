@@ -116,7 +116,7 @@ public class MyCommerce {
             persistPurchaseLicenseeMapping(licensee.getNumber(), purchaseId, productNumber);
             removeExpiredPurchaseLicenseeMappings();
         }
-        return StringUtils.join(licensees, ", ");
+        return StringUtils.join(licensees, "\n");
     }
 
     public String getErrorLog(final String purchaseId) {
