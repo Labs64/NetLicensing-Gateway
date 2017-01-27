@@ -55,24 +55,35 @@ public class MyCommerceController extends AbstractBaseController {
             return myCommerce.codeGenerator(context, purchaseId, productNumber, licenseTemplateList,
                     quantityToLicensee, isSaveUserData, formParams);
         } catch (final MyCommerceException e) {
-            persistingLogger.log(purchaseId, StoredLog.Severity.ERROR, e.getResponse().getEntity().toString());
+            persistingLogger.log(productNumber, purchaseId, StoredLog.Severity.ERROR,
+                    e.getResponse().getEntity().toString());
             throw e;
         } catch (final NetLicensingException e) {
-            persistingLogger.log(purchaseId, StoredLog.Severity.ERROR, e.getMessage());
+            persistingLogger.log(productNumber, purchaseId, StoredLog.Severity.ERROR, e.getMessage());
             throw new MyCommerceException(e.getMessage());
         } catch (final Exception e) {
-            persistingLogger.log(purchaseId, StoredLog.Severity.ERROR, e.getMessage());
+            persistingLogger.log(productNumber, purchaseId, StoredLog.Severity.ERROR, e.getMessage());
             throw new MyCommerceException(e.getMessage());
         }
     }
 
     @GET
     @Path("/" + Constants.MyCommerce.ENDPOINT_PATH_LOG)
-    public String getErrorLog(@QueryParam(Constants.MyCommerce.PURCHASE_ID) final String purchaseId) {
-        if (purchaseId == null) {
-            throw new MyCommerceException("'" + Constants.MyCommerce.PURCHASE_ID + "' parameter is not provided");
+    public String getErrorLog(@QueryParam(Constants.MyCommerce.PRODUCT_ID) final String productNumber,
+            @QueryParam(Constants.MyCommerce.PURCHASE_ID) final String purchaseId) {
+        if (productNumber == null) {
+            throw new MyCommerceException("'" + Constants.MyCommerce.PRODUCT_ID + "' parameter is not provided");
         }
-        return myCommerce.getErrorLog(purchaseId);
+        try {
+            final Context context = getSecurityHelper().getContext();
+            return myCommerce.getErrorLog(context, productNumber, purchaseId);
+        } catch (final NetLicensingException e) {
+            persistingLogger.log(productNumber, purchaseId, StoredLog.Severity.ERROR, e.getMessage());
+            throw new MyCommerceException(e.getMessage());
+        } catch (final Exception e) {
+            persistingLogger.log(productNumber, purchaseId, StoredLog.Severity.ERROR, e.getMessage());
+            throw new MyCommerceException(e.getMessage());
+        }
     }
 
 }

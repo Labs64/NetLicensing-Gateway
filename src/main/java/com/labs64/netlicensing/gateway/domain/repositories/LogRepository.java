@@ -17,6 +17,8 @@ public interface LogRepository extends CrudRepository<StoredLog, String> {
 
     List<StoredLog> findByKey(String key);
 
+    List<StoredLog> findByKeyAndSecondaryKey(String key, String secondaryKey);
+
     void deleteByTimestampBefore(@Temporal(TemporalType.TIMESTAMP) Date date);
 
 }

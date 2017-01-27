@@ -26,6 +26,9 @@ public class StoredLog extends AbstractPersistable<String> {
     @Column(name = "KEY", nullable = true)
     private String key;
 
+    @Column(name = "SECONDARY_KEY", nullable = true)
+    private String secondaryKey;
+
     @Column(name = "MESSAGE", nullable = true)
     private String message;
 
@@ -42,6 +45,14 @@ public class StoredLog extends AbstractPersistable<String> {
 
     public void setKey(final String key) {
         this.key = key;
+    }
+
+    public String getSecondaryKey() {
+        return secondaryKey;
+    }
+
+    public void setSecondaryKey(final String secondaryKey) {
+        this.secondaryKey = secondaryKey;
     }
 
     public String getMessage() {

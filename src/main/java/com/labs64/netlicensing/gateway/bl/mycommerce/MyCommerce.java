@@ -57,7 +57,7 @@ public class MyCommerce {
 
         final String logMessage = "Executing MyCommerce Code Generator for productNumber: " + productNumber
                 + ", licenseTemplateList: " + licenseTemplateList.toString() + ", formParams: " + formParams.toString();
-        persistingLogger.log(purchaseId, StoredLog.Severity.INFO, logMessage, LOGGER);
+        persistingLogger.log(productNumber, purchaseId, StoredLog.Severity.INFO, logMessage, LOGGER);
 
         final List<String> licensees = new ArrayList<>();
         if (formParams.isEmpty() || licenseTemplateList.isEmpty()) {
@@ -119,15 +119,29 @@ public class MyCommerce {
         return StringUtils.join(licensees, "\n");
     }
 
-    public String getErrorLog(final String purchaseId) {
-        final List<StoredLog> logs = persistingLogger.getLogsByKey(purchaseId);
+    public String getErrorLog(final Context context, final String productNumber, final String purchaseId)
+            throws NetLicensingException {
+        final Product product = ProductService.get(context, productNumber);
 
+        List<StoredLog> logs = new ArrayList<StoredLog>();
+
+        if (purchaseId != null && !purchaseId.isEmpty()) {
+            logs = persistingLogger.getLogsByKeyAndSecondaryKey(productNumber, purchaseId);
+        } else {
+            logs = persistingLogger.getLogsByKey(productNumber);
+        }
         final StringBuilder logStringBuilder = new StringBuilder();
         if (logs.isEmpty()) {
             logStringBuilder.append("No log entires for ");
-            logStringBuilder.append(Constants.MyCommerce.PURCHASE_ID);
+            logStringBuilder.append(Constants.MyCommerce.PRODUCT_ID);
             logStringBuilder.append("=");
-            logStringBuilder.append(purchaseId);
+            logStringBuilder.append(productNumber);
+            if (purchaseId != null && !purchaseId.isEmpty()) {
+                logStringBuilder.append(" and ");
+                logStringBuilder.append(Constants.MyCommerce.PURCHASE_ID);
+                logStringBuilder.append("=");
+                logStringBuilder.append(purchaseId);
+            }
             logStringBuilder.append(" within last ");
             logStringBuilder.append(Constants.LOG_PERSIST_DAYS);
             logStringBuilder.append(" days.");

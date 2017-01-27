@@ -25,12 +25,13 @@ public class PersistingLogger {
     @Inject
     private TimeStampTracker timeStampTracker;
 
-    public void log(final String key, final StoredLog.Severity severity, final String msg) {
-        log(key, severity, msg, null);
+    public void log(final String key, final String secondaryKey, final StoredLog.Severity severity, final String msg) {
+        log(key, secondaryKey, severity, msg, null);
     }
 
     @Transactional
-    public void log(final String key, final StoredLog.Severity severity, final String msg, final Logger logger) {
+    public void log(final String key, final String secondaryKey, final StoredLog.Severity severity, final String msg,
+            final Logger logger) {
         if (logger != null) {
             switch (severity) {
             case ERROR:
@@ -46,6 +47,7 @@ public class PersistingLogger {
         }
         final StoredLog requestResponse = new StoredLog();
         requestResponse.setKey(key);
+        requestResponse.setSecondaryKey(secondaryKey);
         requestResponse.setSeverity(severity);
         requestResponse.setMessage(msg);
         requestResponse.setTimestamp(new Date());
@@ -63,4 +65,8 @@ public class PersistingLogger {
         return logRepository.findByKey(key);
     }
 
+    @Transactional
+    public List<StoredLog> getLogsByKeyAndSecondaryKey(final String key, final String secondaryKey) {
+        return logRepository.findByKeyAndSecondaryKey(key, secondaryKey);
+    }
 }
