@@ -8,6 +8,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.labs64.netlicensing.gateway.domain.entity.StoredLog;
@@ -25,11 +26,12 @@ public class PersistingLogger {
     @Inject
     private TimeStampTracker timeStampTracker;
 
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void log(final String key, final String secondaryKey, final StoredLog.Severity severity, final String msg) {
         log(key, secondaryKey, severity, msg, null);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void log(final String key, final String secondaryKey, final StoredLog.Severity severity, final String msg,
             final Logger logger) {
         if (logger != null) {

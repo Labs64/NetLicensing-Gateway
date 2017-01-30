@@ -47,7 +47,9 @@ public class MyCommerceController extends AbstractBaseController {
         final String purchaseId = formParams.getFirst(Constants.MyCommerce.PURCHASE_ID);
 
         if (purchaseId == null) {
-            throw new MyCommerceException("'" + Constants.MyCommerce.PURCHASE_ID + "' is not provided");
+            final String message = "'" + Constants.MyCommerce.PURCHASE_ID + "' is not provided";
+            persistingLogger.log(productNumber, null, StoredLog.Severity.ERROR, message);
+            throw new MyCommerceException(message);
         }
 
         try {
