@@ -36,6 +36,7 @@ import com.labs64.netlicensing.service.LicenseService;
 import com.labs64.netlicensing.service.LicenseTemplateService;
 import com.labs64.netlicensing.service.LicenseeService;
 import com.labs64.netlicensing.service.ProductService;
+import com.labs64.netlicensing.service.UtilityService;
 
 @Component
 public class MyCommerce {
@@ -121,9 +122,9 @@ public class MyCommerce {
 
     public String getErrorLog(final Context context, final String productNumber, final String purchaseId)
             throws NetLicensingException {
-        ProductService.get(context, productNumber);// dummy request
+        UtilityService.listLicenseTypes(context); // dummy request
 
-        List<StoredLog> logs = new ArrayList<StoredLog>();
+        List<StoredLog> logs = new ArrayList<>();
 
         if (purchaseId != null && !purchaseId.isEmpty()) {
             logs = persistingLogger.getLogsByKeyAndSecondaryKey(productNumber, purchaseId);
@@ -133,7 +134,7 @@ public class MyCommerce {
         final StringBuilder logStringBuilder = new StringBuilder();
         if (logs.isEmpty()) {
             logStringBuilder.append("No log entires for ");
-            logStringBuilder.append(Constants.MyCommerce.PRODUCT_ID);
+            logStringBuilder.append(Constants.NetLicensing.PRODUCT_NUMBER);
             logStringBuilder.append("=");
             logStringBuilder.append(productNumber);
             if (purchaseId != null && !purchaseId.isEmpty()) {

@@ -36,10 +36,10 @@ public class MyCommerceController extends AbstractBaseController {
     private PersistingLogger persistingLogger;
 
     @POST
-    @Path("/" + Constants.MyCommerce.ENDPOINT_PATH_CODEGEN + "/{" + Constants.MyCommerce.PRODUCT_NUMBER + "}")
+    @Path("/" + Constants.MyCommerce.ENDPOINT_PATH_CODEGEN + "/{" + Constants.NetLicensing.PRODUCT_NUMBER + "}")
     @Transactional
-    public String codeGenerator(@PathParam(Constants.MyCommerce.PRODUCT_NUMBER) final String productNumber,
-            @QueryParam(Constants.MyCommerce.LICENSE_TEMPLATE_NUMBER) final List<String> licenseTemplateList,
+    public String codeGenerator(@PathParam(Constants.NetLicensing.PRODUCT_NUMBER) final String productNumber,
+            @QueryParam(Constants.NetLicensing.LICENSE_TEMPLATE_NUMBER) final List<String> licenseTemplateList,
             @DefaultValue("false") @QueryParam(Constants.MyCommerce.QUANTITY_TO_LICENSEE) final boolean quantityToLicensee,
             @DefaultValue("false") @QueryParam(Constants.MyCommerce.SAVE_USER_DATA) final boolean isSaveUserData,
             final MultivaluedMap<String, String> formParams) {
@@ -70,20 +70,15 @@ public class MyCommerceController extends AbstractBaseController {
     }
 
     @GET
-    @Path("/" + Constants.MyCommerce.ENDPOINT_PATH_LOG)
-    public String getErrorLog(@QueryParam(Constants.MyCommerce.PRODUCT_ID) final String productNumber,
+    @Path("/" + Constants.MyCommerce.ENDPOINT_PATH_LOG + "/{" + Constants.NetLicensing.PRODUCT_NUMBER + "}")
+    public String getErrorLog(@PathParam(Constants.NetLicensing.PRODUCT_NUMBER) final String productNumber,
             @QueryParam(Constants.MyCommerce.PURCHASE_ID) final String purchaseId) {
-        if (productNumber == null) {
-            throw new MyCommerceException("'" + Constants.MyCommerce.PRODUCT_ID + "' parameter is not provided");
-        }
         try {
             final Context context = getSecurityHelper().getContext();
             return myCommerce.getErrorLog(context, productNumber, purchaseId);
         } catch (final NetLicensingException e) {
-            persistingLogger.log(productNumber, purchaseId, StoredLog.Severity.ERROR, e.getMessage());
             throw new MyCommerceException(e.getMessage());
         } catch (final Exception e) {
-            persistingLogger.log(productNumber, purchaseId, StoredLog.Severity.ERROR, e.getMessage());
             throw new MyCommerceException(e.getMessage());
         }
     }
