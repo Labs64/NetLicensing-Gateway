@@ -40,7 +40,7 @@ public class MyCommerceController extends AbstractBaseController {
     @Transactional
     public String codeGenerator(@PathParam(Constants.NetLicensing.PRODUCT_NUMBER) final String productNumber,
             @QueryParam(Constants.NetLicensing.LICENSE_TEMPLATE_NUMBER) final List<String> licenseTemplateList,
-            @DefaultValue("false") @QueryParam(Constants.MyCommerce.QUANTITY_TO_LICENSEE) final boolean quantityToLicensee,
+            @DefaultValue("true") @QueryParam(Constants.MyCommerce.QUANTITY_TO_LICENSEE) final boolean quantityToLicensee,
             @DefaultValue("false") @QueryParam(Constants.MyCommerce.SAVE_USER_DATA) final boolean isSaveUserData,
             final MultivaluedMap<String, String> formParams) {
 
