@@ -36,7 +36,6 @@ import com.labs64.netlicensing.service.LicenseService;
 import com.labs64.netlicensing.service.LicenseTemplateService;
 import com.labs64.netlicensing.service.LicenseeService;
 import com.labs64.netlicensing.service.ProductService;
-import com.labs64.netlicensing.service.UtilityService;
 
 @Component
 public class MyCommerce {
@@ -122,7 +121,7 @@ public class MyCommerce {
 
     public String getErrorLog(final Context context, final String productNumber, final String purchaseId)
             throws NetLicensingException {
-        UtilityService.listLicenseTypes(context); // dummy request
+        ProductService.get(context, productNumber);// dummy request
 
         List<StoredLog> logs = new ArrayList<>();
 
