@@ -7,6 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.labs64.netlicensing.domain.vo.Context;
 import com.labs64.netlicensing.domain.vo.SecurityMode;
+import com.labs64.netlicensing.provider.RestProvider;
 
 /**
  * Utility class SecurityHelper contains helper methods for the Spring security context.
@@ -16,6 +17,20 @@ public final class SecurityHelper {
     private String nlicBaseUrl;
     private String nlicDemoUser;
     private String nlicDemoPass;
+
+    public class GWClientConfiguration implements RestProvider.Configuration {
+
+        @Override
+        public String getUserAgent() {
+            return "NetLicensing/Java " + System.getProperty("java.version") + " (Gateway)";
+        }
+
+        @Override
+        public boolean isLoggingEnabled() {
+            return false;
+        }
+
+    }
 
     @Required
     public void setNlicBaseUrl(final String nlicBaseUrl) {
@@ -36,6 +51,7 @@ public final class SecurityHelper {
         final Context context = new Context();
         context.setBaseUrl(nlicBaseUrl);
         context.setSecurityMode(SecurityMode.BASIC_AUTHENTICATION);
+        context.setObject(RestProvider.Configuration.class, new GWClientConfiguration());
 
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {
@@ -57,6 +73,7 @@ public final class SecurityHelper {
         context.setSecurityMode(SecurityMode.BASIC_AUTHENTICATION);
         context.setUsername(nlicDemoUser);
         context.setPassword(nlicDemoPass);
+        context.setObject(RestProvider.Configuration.class, new GWClientConfiguration());
         return context;
     }
 
