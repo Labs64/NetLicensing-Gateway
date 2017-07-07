@@ -97,6 +97,7 @@ public class MyCommerce {
                 }
                 licensee.setActive(true);
                 licensee.setProduct(product);
+                licensee.addProperty(Constants.NetLicensing.PROP_MARKED_FOR_TRANSFER, "true");
                 licensee = LicenseeService.create(context, productNumber, licensee);
             }
             for (final LicenseTemplate licenseTemplate : licenseTemplates.values()) {
@@ -104,7 +105,7 @@ public class MyCommerce {
                 newLicense.setActive(true);
                 // Required for timeVolume.
                 if (LicenseType.TIMEVOLUME.equals(licenseTemplate.getLicenseType())) {
-                    newLicense.addProperty(Constants.PROP_START_DATE, "now");
+                    newLicense.addProperty(Constants.NetLicensing.PROP_START_DATE, "now");
                 }
                 LicenseService.create(context, licensee.getNumber(), licenseTemplate.getNumber(), null, newLicense);
             }

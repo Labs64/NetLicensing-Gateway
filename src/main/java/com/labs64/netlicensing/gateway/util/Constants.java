@@ -5,7 +5,6 @@ public class Constants {
     private Constants() {
     }
 
-    public static final String PROP_START_DATE = "startDate";
     public static final int CLEANUP_PERIOD_MINUTES = 60;
     public static final String LOG_NEXT_CLEANUP_TAG = "LogNextCleanup";
     public static final int LOG_PERSIST_DAYS = 30;
@@ -13,6 +12,8 @@ public class Constants {
     public static final class NetLicensing {
         public static final String PRODUCT_NUMBER = "productNumber";
         public static final String LICENSE_TEMPLATE_NUMBER = "licenseTemplateNumber";
+        public static final String PROP_MARKED_FOR_TRANSFER = "markedForTransfer";
+        public static final String PROP_START_DATE = "startDate";
     }
 
     public static final class Monitoring {
