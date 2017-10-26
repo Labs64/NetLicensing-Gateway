@@ -1,4 +1,4 @@
-<img src="https://netlicensing.io/img/netlicensing-stage-banner-01.png">
+<img src="https://netlicensing.io/img/netlicensing-stage-twitter.jpg">
 
 # Labs64 NetLicensing / eCommerce Gateway
 
