@@ -1,7 +1,7 @@
 ---
 name: New integration
 about: New e-Commerce integration
-title: Enable NAME integration
+title: Enable ECOMM-NAME integration
 labels: 'enhancement'
 assignees: ''
 
@@ -24,7 +24,7 @@ ISV will be able to use NetLicensing Gateway integration with the chosen fronten
 - Sample implementation (MyCommerce): https://github.com/Labs64/NetLicensing-Gateway/blob/master/src/main/java/com/labs64/netlicensing/gateway/controller/restful/MyCommerceController.java
 - NetLicening RESTful API: https://www.labs64.de/confluence/x/pwCo
 - NetLicensing test account: `demo:demo` or your own
-- **E-commerce integration documentation:** _TBD_
+- **E-commerce integration documentation:** _ECOMM-DOC-URL_
 
 ---
 
