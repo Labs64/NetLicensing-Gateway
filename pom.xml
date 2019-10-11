@@ -47,7 +47,7 @@
         <enum.project-stage.production>Production</enum.project-stage.production>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>1.7</java.version>
+        <java.version>1.8</java.version>
         <maven.version>3.0.5</maven.version>
         <gateway.PROJECT_STAGE>${enum.project-stage.development}</gateway.PROJECT_STAGE>
 
