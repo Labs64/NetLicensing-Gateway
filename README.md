@@ -36,3 +36,10 @@ When the build is done. Run the container:
 ```
 
 Now application can be accessed here : [http://localhost:8081](http://localhost:8081).
+
+If needed, to access the admin console. Run docker container with following command.
+*(Be-aware: that Tomcat user configuration is located in ./conf/tomcat-users.xml)*
+
+```
+> $ docker container run -it -v $(pwd)/conf/tomcat-users.xml:/usr/local/tomcat/conf/tomcat-users.xml --publish 8081:8080 labs64/gateway
+```
