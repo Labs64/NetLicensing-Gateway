@@ -15,7 +15,7 @@ See the [Wiki](https://github.com/Labs64/NetLicensing-Gateway/wiki/) for full do
 
 See the NetLicensing [RESTful API](https://www.labs64.de/confluence/x/pwCo) for the service API.
 
-## Docker Deployment
+## Docker Build and Deployment
 
 Prerequisites install [docker](https://docs.docker.com/install/) on you host. 
 
@@ -25,11 +25,10 @@ To build the docker run:
 ```
 Where `labs64` and `gateway` is _company_name_ and _app_image_name_.
 
-When the build is done. Run the container: 
+When the build is done. To run the standalone container: 
 ```
 > $ docker container run -it --publish 8081:8080 labs64/gateway
 ```
-
 Now application can be accessed here : [http://localhost:8081](http://localhost:8081).
 
 If needed, to access the admin console. Run docker container with following command.
@@ -38,6 +37,14 @@ If needed, to access the admin console. Run docker container with following comm
 ```
 > $ docker container run -it -v $(pwd)/conf/tomcat-users.xml:/usr/local/tomcat/conf/tomcat-users.xml --publish 8081:8080 labs64/gateway
 ```
+
+To run in combination with Ngrok use docker-compose: 
+
+```
+> $ docker-compose up
+```
+
+Then the ngrok endpoint is accessable at : `http://127.0.0.1:4040`
 
 ## Bugs and Feedback
 
