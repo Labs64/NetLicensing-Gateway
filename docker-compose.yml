@@ -7,11 +7,11 @@ services:
   ngrok:
     image: "wernight/ngrok"
     ports:
-    - "4040:4040"
+      - "4040:4040"
     command:
-    - /bin/sh
-    - -c
-    - |
-      ngrok http gateway-app:8080
+      - /bin/sh
+      - -c
+      - |
+        ngrok http gateway-app:8080
     depends_on:
-    - gateway-app
+      - gateway-app

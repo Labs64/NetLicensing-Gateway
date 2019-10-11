@@ -4,7 +4,6 @@ about: New e-Commerce integration
 title: Enable ECOMM-NAME integration
 labels: 'enhancement'
 assignees: ''
-
 ---
 
 ### Use Case:

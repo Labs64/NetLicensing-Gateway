@@ -17,34 +17,48 @@ See the NetLicensing [RESTful API](https://www.labs64.de/confluence/x/pwCo) for 
 
 ## Docker Build and Deployment
 
-Prerequisites install [docker](https://docs.docker.com/install/) on you host. 
+Prerequisites install [docker](https://docs.docker.com/install/) on you host.
 
-To build the docker run: 
+To build the docker image execute:
 ```
-> $ docker image build -t labs64/gateway ./
+$ docker image build -t labs64/gateway ./
 ```
-Where `labs64` and `gateway` is _company_name_ and _app_image_name_.
+Where `labs64` and `gateway` are _company_name_ and _app_image_name_.
 
-When the build is done. To run the standalone container: 
+### Use standalone container
 ```
-> $ docker container run -it --publish 8081:8080 labs64/gateway
+$ docker container run -it --publish 8081:8080 labs64/gateway
 ```
-Now application can be accessed here : [http://localhost:8081](http://localhost:8081).
+Application can be accessed at [http://localhost:8081](http://localhost:8081)
 
-If needed, to access the admin console. Run docker container with following command.
-*(Be-aware: that Tomcat user configuration is located in ./conf/tomcat-users.xml)*
+If needed, to access the admin console. Run docker container with the following command.
 
-```
-> $ docker container run -it -v $(pwd)/conf/tomcat-users.xml:/usr/local/tomcat/conf/tomcat-users.xml --publish 8081:8080 labs64/gateway
-```
-
-To run in combination with Ngrok use docker-compose: 
+Note: Tomcat user configuration is located in ./conf/tomcat-users.xml
 
 ```
-> $ docker-compose up
+$ docker container run -it -v $(pwd)/conf/tomcat-users.xml:/usr/local/tomcat/conf/tomcat-users.xml --publish 8081:8080 labs64/gateway
 ```
 
-Then the ngrok endpoint is accessable at : `http://127.0.0.1:4040`
+### Use docker-compose (Tomcat + ngrok)
+
+Start environment:
+```
+$ docker-compose up -d
+```
+
+The ngrok monitoring endpoint will be accessible at `http://127.0.0.1:4040`
+
+Stop environment:
+```
+$ docker-compose down
+```
+
+### Sanity checks
+
+To verify whether your local development environment is up and running run open URL in your browser:
+
+* localhost: http://localhost:8081/gateway/monitoring
+* ngrok: http://<ngrok-subdomain>.ngrok.io/gateway/monitoring (Note: `ngrok-subdomain` might change on every environment start)
 
 ## Bugs and Feedback
 
