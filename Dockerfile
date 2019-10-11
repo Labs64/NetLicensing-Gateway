@@ -1,5 +1,5 @@
 # tomcat:8.0 image from docker hub.
-FROM tomcat:8.0
+FROM tomcat:8.5
 
 
 # COPY path-to-application-war path-to-webapps-in-docker-tomcat
