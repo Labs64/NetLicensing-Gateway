@@ -15,11 +15,6 @@ See the [Wiki](https://github.com/Labs64/NetLicensing-Gateway/wiki/) for full do
 
 See the NetLicensing [RESTful API](https://www.labs64.de/confluence/x/pwCo) for the service API.
 
-## Bugs and Feedback
-
-For bugs, questions and discussions please use the [GitHub Issues](https://github.com/Labs64/NetLicensing-Gateway/issues).
-
-
 ## Docker Deployment
 
 Prerequisites install [docker](https://docs.docker.com/install/) on you host. 
@@ -43,3 +38,7 @@ If needed, to access the admin console. Run docker container with following comm
 ```
 > $ docker container run -it -v $(pwd)/conf/tomcat-users.xml:/usr/local/tomcat/conf/tomcat-users.xml --publish 8081:8080 labs64/gateway
 ```
+
+## Bugs and Feedback
+
+For bugs, questions and discussions please use the [GitHub Issues](https://github.com/Labs64/NetLicensing-Gateway/issues).
