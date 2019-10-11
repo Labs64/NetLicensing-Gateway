@@ -48,7 +48,7 @@
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
-        <maven.version>3.5.4</maven.version>
+        <maven.version>3.5.2</maven.version>
         <gateway.PROJECT_STAGE>${enum.project-stage.development}</gateway.PROJECT_STAGE>
 
         <repo.releases.url>OVERRIDE_REPO_URL</repo.releases.url>
