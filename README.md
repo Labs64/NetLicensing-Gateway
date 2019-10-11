@@ -17,7 +17,8 @@ See the NetLicensing [RESTful API](https://www.labs64.de/confluence/x/pwCo) for 
 
 ## Docker Build and Deployment
 
-Prerequisites install [docker](https://docs.docker.com/install/) on you host.
+Prerequisites:
+* install [docker](https://docs.docker.com/install/) on you host
 
 To build the docker image execute:
 ```
@@ -46,7 +47,7 @@ Start environment:
 $ docker-compose up -d
 ```
 
-The ngrok monitoring endpoint will be accessible at `http://127.0.0.1:4040`
+The ngrok monitoring endpoint can be accessed at [http://127.0.0.1:4040](http://127.0.0.1:4040)
 
 Stop environment:
 ```
@@ -55,10 +56,10 @@ $ docker-compose down
 
 ### Sanity checks
 
-To verify whether your local development environment is up and running run open URL in your browser:
+To verify whether your local development environment is up and running open following URLs in your browser:
 
 * localhost: http://localhost:8081/gateway/monitoring
-* ngrok: http://<ngrok-subdomain>.ngrok.io/gateway/monitoring (Note: `ngrok-subdomain` might change on every environment start)
+* ngrok: http://ngrok-subdomain.ngrok.io/gateway/monitoring (Note: `ngrok-subdomain` might change on every environment start)
 
 ## Bugs and Feedback
 
