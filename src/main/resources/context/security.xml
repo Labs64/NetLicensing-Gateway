@@ -11,8 +11,6 @@
     <http auto-config="true" create-session="never" realm="Labs64 NetLicensing Gateway" request-matcher="regex" use-expressions="false">
         <http-basic />
         <csrf disabled="true"/>
-        <!-- The most specific patterns should come first, as they are tried in order -->
-        <intercept-url pattern="\A/mycommerce/codegen.*\Z" access="ROLE_VENDOR" />
     </http>
 
     <beans:bean id="forwardAuthenticationProvider"
