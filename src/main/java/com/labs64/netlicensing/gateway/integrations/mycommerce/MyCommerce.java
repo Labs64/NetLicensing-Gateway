@@ -193,7 +193,7 @@ public class MyCommerce {
             throws NetLicensingException {
         ProductService.get(context, productNumber);// dummy request
 
-        List<StoredLog> logs = new ArrayList<>();
+        List<StoredLog> logs;
 
         if (purchaseId != null && !purchaseId.isEmpty()) {
             logs = persistingLogger.getLogsByKeyAndSecondaryKey(productNumber, purchaseId);
@@ -273,7 +273,7 @@ public class MyCommerce {
     }
 
     private Map<String, LicenseTemplate> getLicenseTemplates(final Context context,
-            final List<String> licenseTemplateList) throws MyCommerceException, NetLicensingException {
+            final List<String> licenseTemplateList) throws NetLicensingException {
         final Map<String, LicenseTemplate> licenseTemplates = new HashMap<>();
         final Iterator<String> licenseTemplateIterator = licenseTemplateList.iterator();
         while (licenseTemplateIterator.hasNext()) {
@@ -284,14 +284,14 @@ public class MyCommerce {
     }
 
     private Licensee getExistingLicensee(final Context context, String licenseeNumber, final String purchaseId,
-            final String productNumber) throws MyCommerceException, NetLicensingException {
+            final String productNumber) throws NetLicensingException {
         Licensee licensee = null;
         if (StringUtils.isBlank(licenseeNumber)) { // ADD[LICENSEENUMBER] is not provided, get from database
             final MyCommercePurchase myCommercePurchase = myCommercePurchaseRepository
                     .findFirstByPurchaseIdAndProductNumber(purchaseId, productNumber);
             if (myCommercePurchase != null) {
                 licenseeNumber = myCommercePurchase.getLicenseeNumber();
-                LOGGER.info("licenseeNumber obtained from repository: " + licenseeNumber);
+                LOGGER.info("licenseeNumber obtained from repository: {}", licenseeNumber);
             }
         }
         if (StringUtils.isNotBlank(licenseeNumber)) {

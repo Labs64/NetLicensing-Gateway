@@ -10,11 +10,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.labs64.netlicensing.domain.vo.Context;
-import com.labs64.netlicensing.exception.NetLicensingException;
 import com.labs64.netlicensing.gateway.controller.exception.MonitoringException;
 import com.labs64.netlicensing.gateway.domain.repositories.TimeStampRepository;
 import com.labs64.netlicensing.gateway.util.Constants;
-import com.labs64.netlicensing.service.UtilityService;;
+import com.labs64.netlicensing.service.UtilityService;
 
 @Component
 @Path("/" + Constants.Monitoring.ENDPOINT_BASE_PATH)
@@ -33,7 +32,7 @@ public class MonitoringController extends AbstractBaseController {
 
     @GET
     @Path("/")
-    public String monitoring() throws NetLicensingException {
+    public String monitoring() {
         checkNetLicensingAvailability();
         checkDatabaseAvailability();
         return projectName + " " + projectVersion + " is up and running.";

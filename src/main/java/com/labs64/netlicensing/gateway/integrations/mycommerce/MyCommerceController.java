@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.labs64.netlicensing.domain.vo.Context;
-import com.labs64.netlicensing.exception.NetLicensingException;
 import com.labs64.netlicensing.gateway.bl.PersistingLogger;
 import com.labs64.netlicensing.gateway.controller.restful.AbstractBaseController;
 import com.labs64.netlicensing.gateway.domain.entity.StoredLog;
@@ -60,9 +59,6 @@ public class MyCommerceController extends AbstractBaseController {
             persistingLogger.log(productNumber, purchaseId, StoredLog.Severity.ERROR,
                     e.getResponse().getEntity().toString());
             throw e;
-        } catch (final NetLicensingException e) {
-            persistingLogger.log(productNumber, purchaseId, StoredLog.Severity.ERROR, e.getMessage());
-            throw new MyCommerceException(e.getMessage());
         } catch (final Exception e) {
             persistingLogger.log(productNumber, purchaseId, StoredLog.Severity.ERROR, e.getMessage());
             throw new MyCommerceException(e.getMessage());
@@ -76,8 +72,6 @@ public class MyCommerceController extends AbstractBaseController {
         try {
             final Context context = getSecurityHelper().getContext();
             return myCommerce.getErrorLog(context, productNumber, purchaseId);
-        } catch (final NetLicensingException e) {
-            throw new MyCommerceException(e.getMessage());
         } catch (final Exception e) {
             throw new MyCommerceException(e.getMessage());
         }
