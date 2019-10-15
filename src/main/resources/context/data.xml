@@ -16,7 +16,7 @@
     <tx:annotation-driven />
 
     <!-- Spring Data JPA: http://static.springsource.org/spring-data/data-jpa/docs/current/reference/html/ -->
-    <jpa:repositories base-package="com.labs64.netlicensing.gateway.domain.repositories" />
+    <jpa:repositories base-package="com.labs64.netlicensing.gateway.domain.repositories, com.labs64.netlicensing.gateway.integrations" />
 
     <!-- Transaction manager for a single JPA EntityManagerFactory (alternative to JTA) -->
     <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager"

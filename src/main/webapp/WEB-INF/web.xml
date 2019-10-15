@@ -60,7 +60,10 @@
         <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
         <init-param>
             <param-name>jersey.config.server.provider.packages</param-name>
-            <param-value>com.labs64.netlicensing.gateway.controller.restful</param-value>
+            <param-value>
+                com.labs64.netlicensing.gateway.controller.restful
+                com.labs64.netlicensing.gateway.integrations
+            </param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
