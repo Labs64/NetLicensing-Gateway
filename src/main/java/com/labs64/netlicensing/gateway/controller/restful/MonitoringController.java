@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.labs64.netlicensing.domain.vo.Context;
 import com.labs64.netlicensing.exception.NetLicensingException;
-import com.labs64.netlicensing.gateway.controller.restful.exception.MonitoringException;
+import com.labs64.netlicensing.gateway.controller.exception.MonitoringException;
 import com.labs64.netlicensing.gateway.domain.repositories.TimeStampRepository;
 import com.labs64.netlicensing.gateway.util.Constants;
 import com.labs64.netlicensing.service.UtilityService;;

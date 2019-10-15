@@ -1,4 +1,4 @@
-package com.labs64.netlicensing.gateway.domain.entity;
+package com.labs64.netlicensing.gateway.integrations.mycommerce;
 
 import java.util.Date;
 

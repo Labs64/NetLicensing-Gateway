@@ -1,10 +1,12 @@
-package com.labs64.netlicensing.gateway.controller.restful.exception;
+package com.labs64.netlicensing.gateway.integrations.mycommerce;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.labs64.netlicensing.gateway.controller.exception.GatewayException;
 
 public class MyCommerceException extends GatewayException {
 

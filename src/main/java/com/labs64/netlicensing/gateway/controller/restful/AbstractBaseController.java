@@ -6,7 +6,7 @@ import org.springframework.context.ApplicationContext;
 
 import com.labs64.netlicensing.gateway.util.security.SecurityHelper;
 
-abstract class AbstractBaseController {
+public abstract class AbstractBaseController {
 
     @Inject
     private ApplicationContext applicationContext;

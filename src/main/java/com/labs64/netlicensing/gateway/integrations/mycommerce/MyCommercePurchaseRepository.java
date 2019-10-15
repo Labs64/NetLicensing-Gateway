@@ -1,4 +1,4 @@
-package com.labs64.netlicensing.gateway.domain.repositories;
+package com.labs64.netlicensing.gateway.integrations.mycommerce;
 
 import java.util.Date;
 
@@ -6,8 +6,6 @@ import javax.persistence.TemporalType;
 
 import org.springframework.data.jpa.repository.Temporal;
 import org.springframework.data.repository.CrudRepository;
-
-import com.labs64.netlicensing.gateway.domain.entity.MyCommercePurchase;
 
 /**
  * Repository to manage {@link MyCommercePurchase} instances.

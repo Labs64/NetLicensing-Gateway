@@ -15,6 +15,7 @@ package com.labs64.netlicensing.gateway.controller.restful;
 import org.junit.Rule;
 import org.junit.rules.ExpectedException;
 
+import com.labs64.netlicensing.gateway.integrations.mycommerce.MyCommerceController;
 import com.labs64.netlicensing.service.LicenseService;
 
 /**

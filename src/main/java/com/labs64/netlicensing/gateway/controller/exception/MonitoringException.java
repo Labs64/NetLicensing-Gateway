@@ -1,4 +1,4 @@
-package com.labs64.netlicensing.gateway.controller.restful.exception;
+package com.labs64.netlicensing.gateway.controller.exception;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;

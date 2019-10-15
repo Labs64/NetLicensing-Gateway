@@ -1,4 +1,4 @@
-package com.labs64.netlicensing.gateway.controller.restful;
+package com.labs64.netlicensing.gateway.integrations.mycommerce;
 
 import java.util.List;
 
@@ -19,14 +19,13 @@ import org.springframework.transaction.annotation.Transactional;
 import com.labs64.netlicensing.domain.vo.Context;
 import com.labs64.netlicensing.exception.NetLicensingException;
 import com.labs64.netlicensing.gateway.bl.PersistingLogger;
-import com.labs64.netlicensing.gateway.bl.mycommerce.MyCommerce;
-import com.labs64.netlicensing.gateway.controller.restful.exception.MyCommerceException;
+import com.labs64.netlicensing.gateway.controller.restful.AbstractBaseController;
 import com.labs64.netlicensing.gateway.domain.entity.StoredLog;
 import com.labs64.netlicensing.gateway.util.Constants;
 
 @Component
 @Produces({ MediaType.TEXT_PLAIN })
-@Path("/" + Constants.MyCommerce.ENDPOINT_BASE_PATH)
+@Path("/" + MyCommerce.MyCommerceConstants.ENDPOINT_BASE_PATH)
 public class MyCommerceController extends AbstractBaseController {
 
     @Inject
@@ -36,18 +35,19 @@ public class MyCommerceController extends AbstractBaseController {
     private PersistingLogger persistingLogger;
 
     @POST
-    @Path("/" + Constants.MyCommerce.ENDPOINT_PATH_CODEGEN + "/{" + Constants.NetLicensing.PRODUCT_NUMBER + "}")
+    @Path("/" + MyCommerce.MyCommerceConstants.ENDPOINT_PATH_CODEGEN + "/{" + Constants.NetLicensing.PRODUCT_NUMBER
+            + "}")
     @Transactional
     public String codeGenerator(@PathParam(Constants.NetLicensing.PRODUCT_NUMBER) final String productNumber,
             @QueryParam(Constants.NetLicensing.LICENSE_TEMPLATE_NUMBER) final List<String> licenseTemplateList,
-            @DefaultValue("true") @QueryParam(Constants.MyCommerce.QUANTITY_TO_LICENSEE) final boolean quantityToLicensee,
-            @DefaultValue("false") @QueryParam(Constants.MyCommerce.SAVE_USER_DATA) final boolean isSaveUserData,
+            @DefaultValue("true") @QueryParam(MyCommerce.MyCommerceConstants.QUANTITY_TO_LICENSEE) final boolean quantityToLicensee,
+            @DefaultValue("false") @QueryParam(MyCommerce.MyCommerceConstants.SAVE_USER_DATA) final boolean isSaveUserData,
             final MultivaluedMap<String, String> formParams) {
 
-        final String purchaseId = formParams.getFirst(Constants.MyCommerce.PURCHASE_ID);
+        final String purchaseId = formParams.getFirst(MyCommerce.MyCommerceConstants.PURCHASE_ID);
 
         if (purchaseId == null) {
-            final String message = "'" + Constants.MyCommerce.PURCHASE_ID + "' is not provided";
+            final String message = "'" + MyCommerce.MyCommerceConstants.PURCHASE_ID + "' is not provided";
             persistingLogger.log(productNumber, null, StoredLog.Severity.ERROR, message);
             throw new MyCommerceException(message);
         }
@@ -70,9 +70,9 @@ public class MyCommerceController extends AbstractBaseController {
     }
 
     @GET
-    @Path("/" + Constants.MyCommerce.ENDPOINT_PATH_LOG + "/{" + Constants.NetLicensing.PRODUCT_NUMBER + "}")
+    @Path("/" + MyCommerce.MyCommerceConstants.ENDPOINT_PATH_LOG + "/{" + Constants.NetLicensing.PRODUCT_NUMBER + "}")
     public String getErrorLog(@PathParam(Constants.NetLicensing.PRODUCT_NUMBER) final String productNumber,
-            @QueryParam(Constants.MyCommerce.PURCHASE_ID) final String purchaseId) {
+            @QueryParam(MyCommerce.MyCommerceConstants.PURCHASE_ID) final String purchaseId) {
         try {
             final Context context = getSecurityHelper().getContext();
             return myCommerce.getErrorLog(context, productNumber, purchaseId);
