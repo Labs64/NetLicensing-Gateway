@@ -22,7 +22,7 @@ Prerequisites:
 
 To build the docker image execute:
 ```
-$ docker image build -t labs64/gateway ./
+$ docker image build -t labs64/gateway ./dockerfiles/
 ```
 Where `labs64` and `gateway` are _company_name_ and _app_image_name_.
 
@@ -34,10 +34,10 @@ Application can be accessed at [http://localhost:8081](http://localhost:8081)
 
 If needed, to access the admin console. Run docker container with the following command.
 
-Note: Tomcat user configuration is located in ./conf/tomcat-users.xml
+Note: Tomcat user configuration is located in ./dockerfiles/conf/tomcat-users.xml
 
 ```
-$ docker container run -it -v $(pwd)/conf/tomcat-users.xml:/usr/local/tomcat/conf/tomcat-users.xml --publish 8081:8080 labs64/gateway
+$ docker container run -it -v $(pwd)/dockerfiles/conf/tomcat-users.xml:/usr/local/tomcat/conf/tomcat-users.xml --publish 8081:8080 labs64/gateway
 ```
 
 ### Use docker-compose (Tomcat + ngrok)
