@@ -22,7 +22,7 @@ Prerequisites:
 
 To build the docker image execute:
 ```
-$ docker image build -t labs64/gateway ./dockerfiles/
+$ docker image build -t labs64/gateway ./
 ```
 Where `labs64` and `gateway` are _company_name_ and _app_image_name_.
 

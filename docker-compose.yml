@@ -1,7 +1,7 @@
 version: '3'
 services:
   gateway-app:
-    build: ./dockerfiles
+    build: ./
     ports:
       - "8080:8080"
   ngrok:
