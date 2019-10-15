@@ -11,7 +11,7 @@
         <property name="nlicDemoPass" value="${nlic.demo.pass}" />
     </bean>
     
-    <bean id="exceptionMapper" class="com.labs64.netlicensing.gateway.controller.restful.exception.AppExceptionMapper"
+    <bean id="exceptionMapper" class="com.labs64.netlicensing.gateway.controller.exception.AppExceptionMapper"
           scope="singleton" />
     
     <context:component-scan base-package="com.labs64.netlicensing.gateway" />
