@@ -2,7 +2,6 @@ package com.labs64.netlicensing.gateway.integrations.mycommerce;
 
 import java.util.List;
 
-import javax.inject.Inject;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -13,6 +12,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,10 +27,10 @@ import com.labs64.netlicensing.gateway.util.Constants;
 @Path("/" + MyCommerce.MyCommerceConstants.ENDPOINT_BASE_PATH)
 public class MyCommerceController extends AbstractBaseController {
 
-    @Inject
+    @Autowired
     private MyCommerce myCommerce;
 
-    @Inject
+    @Autowired
     private PersistingLogger persistingLogger;
 
     @POST

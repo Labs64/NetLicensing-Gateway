@@ -8,12 +8,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
 import javax.ws.rs.core.MultivaluedMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.labs64.netlicensing.domain.entity.License;
@@ -106,18 +106,17 @@ public class MyCommerce {
         public static final String INVOICE = "INVOICE";
         /** custom field from myCommerce (licenseeNumber) */
         public static final String LICENSEE_NUMBER = "ADD[LICENSEENUMBER]";
-    
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MyCommerce.class);
 
-    @Inject
+    @Autowired
     private PersistingLogger persistingLogger;
 
-    @Inject
+    @Autowired
     private TimeStampTracker timeStampTracker;
 
-    @Inject
+    @Autowired
     private MyCommercePurchaseRepository myCommercePurchaseRepository;
 
     public String codeGenerator(final Context context, final String purchaseId, final String productNumber,

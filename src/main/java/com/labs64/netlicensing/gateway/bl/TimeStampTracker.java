@@ -2,8 +2,7 @@ package com.labs64.netlicensing.gateway.bl;
 
 import java.util.Calendar;
 
-import javax.inject.Inject;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.labs64.netlicensing.gateway.domain.entity.TimeStamp;
@@ -12,7 +11,7 @@ import com.labs64.netlicensing.gateway.domain.repositories.TimeStampRepository;
 @Component
 public class TimeStampTracker {
 
-    @Inject
+    @Autowired
     private TimeStampRepository timeStampRepository;
 
     public boolean isTimeOutExpired(final String tsTag, final int timeOutMinutes) {

@@ -4,9 +4,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,10 +19,10 @@ import com.labs64.netlicensing.gateway.util.Constants;
 @Component
 public class PersistingLogger {
 
-    @Inject
+    @Autowired
     private LogRepository logRepository;
 
-    @Inject
+    @Autowired
     private TimeStampTracker timeStampTracker;
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)

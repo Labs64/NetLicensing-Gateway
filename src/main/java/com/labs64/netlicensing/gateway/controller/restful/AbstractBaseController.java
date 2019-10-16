@@ -1,17 +1,16 @@
 package com.labs64.netlicensing.gateway.controller.restful;
 
-import javax.inject.Inject;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import com.labs64.netlicensing.gateway.util.security.SecurityHelper;
 
 public abstract class AbstractBaseController {
 
-    @Inject
+    @Autowired
     private ApplicationContext applicationContext;
 
-    @Inject
+    @Autowired
     private SecurityHelper securityHelper;
 
     protected ApplicationContext getApplicationContext() {

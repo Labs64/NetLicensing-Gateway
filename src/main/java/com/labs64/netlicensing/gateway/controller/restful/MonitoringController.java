@@ -1,11 +1,11 @@
 package com.labs64.netlicensing.gateway.controller.restful;
 
-import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +21,7 @@ public class MonitoringController extends AbstractBaseController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MonitoringController.class);
 
-    @Inject
+    @Autowired
     private TimeStampRepository timeStampRepository;
 
     @Value("${project.name}")
