@@ -7,7 +7,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.labs64.netlicensing.domain.vo.Context;
 import com.labs64.netlicensing.domain.vo.SecurityMode;
+import com.labs64.netlicensing.exception.NetLicensingException;
 import com.labs64.netlicensing.provider.RestProvider;
+import com.labs64.netlicensing.service.UtilityService;
 
 /**
  * Utility class SecurityHelper contains helper methods for the Spring security context.
@@ -75,6 +77,15 @@ public final class SecurityHelper {
         context.setPassword(nlicDemoPass);
         context.setObject(RestProvider.Configuration.class, new GWClientConfiguration());
         return context;
+    }
+
+    public static boolean checkContextConnection(final Context context) {
+        try {
+            UtilityService.listLicenseTypes(context);
+        } catch (NetLicensingException e) {
+            return false;
+        }
+        return true;
     }
 
 }
