@@ -1,10 +1,14 @@
 package com.labs64.netlicensing.gateway.integrations.fastspring;
 
+import java.util.Arrays;
+import java.util.List;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 
@@ -19,7 +23,6 @@ import com.labs64.netlicensing.exception.NetLicensingException;
 import com.labs64.netlicensing.gateway.bl.PersistingLogger;
 import com.labs64.netlicensing.gateway.controller.restful.AbstractBaseController;
 import com.labs64.netlicensing.gateway.domain.entity.StoredLog;
-import com.labs64.netlicensing.gateway.integrations.mycommerce.MyCommerceException;
 import com.labs64.netlicensing.gateway.util.Constants;
 import com.labs64.netlicensing.gateway.util.security.SecurityHelper;
 
@@ -35,12 +38,12 @@ public class FastSpringController extends AbstractBaseController {
     private PersistingLogger persistingLogger;
 
     @POST
-    @Path("/" + FastSpring.FastSpringConstants.ENDPOINT_PATH_CODEGEN)
+    @Path("/" + Constants.ENDPOINT_PATH_CODEGEN)
     @Transactional
     public String codeGenerator(final MultivaluedMap<String, String> formParams) throws NetLicensingException {
 
         final Context context = getSecurityHelper().getContext();
-        //context.setBaseUrl("http://localhost:28080/core/v2/rest"); // TODO(AY): TEMP
+        context.setBaseUrl("http://localhost:28080/core/v2/rest"); // TODO(AY): TEMP
 
         final String apiKey = formParams.getFirst(FastSpring.FastSpringConstants.API_KEY);
         if (apiKey.isEmpty()) {
@@ -60,9 +63,11 @@ public class FastSpringController extends AbstractBaseController {
 
         final String reference = formParams.getFirst(FastSpring.FastSpringConstants.REFERENCE);
         final String productNumber = formParams.getFirst(Constants.NetLicensing.PRODUCT_NUMBER);
-        final String licenseTemplateNumber = formParams.getFirst(Constants.NetLicensing.LICENSE_TEMPLATE_NUMBER);
 
-        if (StringUtils.isEmpty(productNumber) || StringUtils.isEmpty(licenseTemplateNumber)) {
+        final List<String> licenseTemplateList = Arrays.asList(
+                formParams.getFirst(FastSpring.FastSpringConstants.LICENSE_TEMPLATE_LIST).split("\\s*,\\s*"));
+
+        if (StringUtils.isEmpty(productNumber) || licenseTemplateList.isEmpty()) {
             throw new FastSpringException("Required parameters not provided");
         }
 
@@ -72,27 +77,34 @@ public class FastSpringController extends AbstractBaseController {
             throw new FastSpringException(message);
         }
 
+        //default false
+        final boolean isSaveUserData = Boolean.parseBoolean(formParams.getFirst(Constants.SAVE_USER_DATA));
+        //default true
+        String quantityToLicenseeParam = formParams.getFirst(Constants.QUANTITY_TO_LICENSEE);
+        boolean quantityToLicensee = quantityToLicenseeParam == null || Boolean.parseBoolean(quantityToLicenseeParam);
+
         try {
-            return fastSpring.codeGenerator(context, reference, formParams);
+            return fastSpring.codeGenerator(context, reference, productNumber, licenseTemplateList, quantityToLicensee,
+                    isSaveUserData, formParams);
         } catch (final FastSpringException e) {
             persistingLogger.log(productNumber, reference, StoredLog.Severity.ERROR,
                     e.getResponse().getEntity().toString());
             throw e;
         } catch (final Exception e) {
             persistingLogger.log(productNumber, reference, StoredLog.Severity.ERROR, e.getMessage());
-            throw new MyCommerceException(e.getMessage());
+            throw new FastSpringException(e.getMessage());
         }
     }
 
     @GET
-    @Path("/" + FastSpring.FastSpringConstants.ENDPOINT_PATH_LOG + "/{" + Constants.NetLicensing.PRODUCT_NUMBER + "}")
-    public String getErrorLog(@PathParam(Constants.NetLicensing.PRODUCT_NUMBER) final String productNumber) {
+    @Path("/" + Constants.ENDPOINT_PATH_LOG + "/{" + Constants.NetLicensing.PRODUCT_NUMBER + "}")
+    public String getErrorLog(@PathParam(Constants.NetLicensing.PRODUCT_NUMBER) final String productNumber,
+            @QueryParam(FastSpring.FastSpringConstants.REFERENCE) final String reference) {
         try {
             final Context context = getSecurityHelper().getContext();
-            return fastSpring.getErrorLog(context, productNumber);
+            return fastSpring.getErrorLog(context, productNumber, reference, FastSpring.FastSpringConstants.REFERENCE);
         } catch (final Exception e) {
-            throw new MyCommerceException(e.getMessage());
+            throw new FastSpringException(e.getMessage());
         }
     }
-
 }

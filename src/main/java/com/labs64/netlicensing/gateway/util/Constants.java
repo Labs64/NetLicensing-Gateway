@@ -9,6 +9,11 @@ public class Constants {
     public static final String LOG_NEXT_CLEANUP_TAG = "LogNextCleanup";
     public static final int LOG_PERSIST_DAYS = 30;
 
+    public static final String QUANTITY_TO_LICENSEE = "quantityToLicensee";
+    public static final String ENDPOINT_PATH_CODEGEN = "codegen";
+    public static final String ENDPOINT_PATH_LOG = "log";
+    public static final String SAVE_USER_DATA = "saveUserData";
+
     public static final class NetLicensing {
         public static final String PRODUCT_NUMBER = "productNumber";
         public static final String LICENSE_TEMPLATE_NUMBER = "licenseTemplateNumber";

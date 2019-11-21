@@ -4,6 +4,8 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
@@ -17,46 +19,114 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.labs64.netlicensing.domain.entity.License;
 import com.labs64.netlicensing.domain.entity.LicenseTemplate;
 import com.labs64.netlicensing.domain.entity.Licensee;
 import com.labs64.netlicensing.domain.entity.Product;
 import com.labs64.netlicensing.domain.entity.Token;
-import com.labs64.netlicensing.domain.entity.impl.LicenseImpl;
 import com.labs64.netlicensing.domain.entity.impl.LicenseeImpl;
 import com.labs64.netlicensing.domain.vo.Context;
-import com.labs64.netlicensing.domain.vo.LicenseType;
 import com.labs64.netlicensing.exception.NetLicensingException;
-import com.labs64.netlicensing.gateway.bl.PersistingLogger;
-import com.labs64.netlicensing.gateway.domain.entity.StoredLog;
+import com.labs64.netlicensing.gateway.bl.EntityUtils;
+import com.labs64.netlicensing.gateway.bl.TimeStampTracker;
+import com.labs64.netlicensing.gateway.integrations.common.BaseIntegration;
 import com.labs64.netlicensing.gateway.util.Constants;
-import com.labs64.netlicensing.service.LicenseService;
-import com.labs64.netlicensing.service.LicenseTemplateService;
 import com.labs64.netlicensing.service.LicenseeService;
 import com.labs64.netlicensing.service.ProductService;
 import com.labs64.netlicensing.service.TokenService;
 
 @Component
-public class FastSpring {
-    // TODO: licenseTemplateList - do we need to use it or use single one
-    // TODO: quantityToLicensee - should we use it
+public class FastSpring extends BaseIntegration {
 
     static final class FastSpringConstants {
+        public static final String NEXT_CLEANUP_TAG = "FastSpringNextCleanup";
+        public static final int PERSIST_PURCHASE_DAYS = 3;
+
         static final String ENDPOINT_BASE_PATH = "fastspring";
-        static final String ENDPOINT_PATH_CODEGEN = "codegen";
-        static final String ENDPOINT_PATH_LOG = "log";
         static final String SECURITY_REQUEST_HASH = "security_request_hash";
         static final String API_KEY = "apiKey";
         static final String PRIVATE_KEY = "privateKey";
         static final String QUANTITY = "quantity";
         static final String REFERENCE = "reference";
-        static final String SAVE_USER_DATA = "saveUserData";
+        static final String LICENSE_TEMPLATE_LIST = "licenseTemplateList";
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FastSpring.class);
 
     @Autowired
-    private PersistingLogger persistingLogger;
+    private TimeStampTracker timeStampTracker;
+
+    @Autowired
+    private FastSpringPurchaseRepository fastSpringPurchaseRepository;
+
+    public String codeGenerator(final Context context, final String reference, final String productNumber,
+            final List<String> licenseTemplateList, final boolean quantityToLicensee, final boolean isSaveUserData,
+            final MultivaluedMap<String, String> formParams) throws NetLicensingException {
+
+        logEntries(productNumber, reference, licenseTemplateList, formParams, LOGGER);
+
+        final List<String> licensees = new ArrayList<>();
+        if (formParams.isEmpty() || licenseTemplateList.isEmpty()) {
+            throw new FastSpringException("Required parameters not provided");
+        }
+        final String licenseeNumber = formParams.getFirst(Constants.NetLicensing.LICENSEE_NUMBER);
+        if (quantityToLicensee && !StringUtils.isEmpty(licenseeNumber)) {
+            throw new FastSpringException("'" + Constants.NetLicensing.LICENSEE_NUMBER + "' is not allowed in '"
+                    + Constants.QUANTITY_TO_LICENSEE + "' mode");
+        }
+        final String quantity = formParams.getFirst(FastSpring.FastSpringConstants.QUANTITY);
+        if (quantity == null || quantity.isEmpty() || Integer.parseInt(quantity) < 1) {
+            throw new FastSpringException("'" + FastSpring.FastSpringConstants.QUANTITY + "' invalid or not provided");
+        }
+
+        final Product product = ProductService.get(context, productNumber);
+        final Map<String, LicenseTemplate> licenseTemplates = EntityUtils.getLicenseTemplates(context,
+                licenseTemplateList);
+        Licensee licensee = new LicenseeImpl();
+        boolean isNeedCreateNewLicensee = true;
+
+        // try to get existing Licensee
+        if (!quantityToLicensee) {
+            licensee = getExistingLicensee(context, licenseeNumber, reference, productNumber);
+            // if license template and licensee are bound to different products, need to create new licensee
+            isNeedCreateNewLicensee = isNeedCreateNewLicensee(licensee, productNumber);
+        }
+
+        // create licenses
+        for (int i = 1; i <= Integer.parseInt(quantity); i++) {
+            // create new Licensee, if not existing
+            if (licensee == null || isNeedCreateNewLicensee || quantityToLicensee) {
+                isNeedCreateNewLicensee = false;
+                licensee = createLicensee(context, product, (isSaveUserData ? formParams : null));
+            }
+            createLicenseForLicenseTemplates(context, licenseTemplates, licensee);
+
+            if (!licensees.contains(licensee.getNumber())) {
+                licensees.add(licensee.getNumber());
+            }
+        }
+        if (!quantityToLicensee) {
+            persistPurchaseLicenseeMapping(licensee.getNumber(), reference, productNumber);
+            removeExpiredPurchaseLicenseeMappings();
+        }
+        return StringUtils.join(licensees, "\n");
+    }
+
+    private Licensee getExistingLicensee(final Context context, String licenseeNumber, final String reference,
+            final String productNumber) throws NetLicensingException {
+        Licensee licensee = null;
+        if (StringUtils.isBlank(licenseeNumber)) { // licenseeNumber is not provided, get from database
+            final FastSpringPurchase fastSpringPurchase = fastSpringPurchaseRepository.findFirstByReferenceAndProductNumber(
+                    reference, productNumber);
+            if (fastSpringPurchase != null) {
+                licenseeNumber = fastSpringPurchase.getLicenseeNumber();
+                LOGGER.info("licenseeNumber obtained from repository: {}", licenseeNumber);
+            }
+        }
+        if (StringUtils.isNotBlank(licenseeNumber)) {
+            licensee = LicenseeService.get(context, licenseeNumber);
+        }
+        return licensee;
+    }
 
     /**
      * Sort all parameters passed from our system to your system by parameter name (ordinal value sorting).
@@ -86,115 +156,6 @@ public class FastSpring {
         return md5Custom(hashParam).equals(securityRequestHash);
     }
 
-    public String codeGenerator(final Context context, final String reference,
-            final MultivaluedMap<String, String> formParams) throws NetLicensingException {
-        final List<String> licensees = new ArrayList<>();
-
-        final boolean isSaveUserData = Boolean.parseBoolean(
-                formParams.getFirst(FastSpring.FastSpringConstants.SAVE_USER_DATA));
-        final String productNumber = formParams.getFirst(Constants.NetLicensing.PRODUCT_NUMBER);
-        final String licenseTemplateNumber = formParams.getFirst(Constants.NetLicensing.LICENSE_TEMPLATE_NUMBER);
-
-        final String logMessage =
-                "Executing FastSpring Code Generator for productNumber: " + productNumber + ", licenseTemplateNumber: "
-                        + licenseTemplateNumber + ", formParams: " + formParams.toString();
-        persistingLogger.log(productNumber, reference, StoredLog.Severity.INFO, logMessage, LOGGER);
-
-        final String quantity = formParams.getFirst(FastSpring.FastSpringConstants.QUANTITY);
-        if (quantity == null || quantity.isEmpty() || Integer.parseInt(quantity) < 1) {
-            throw new FastSpringException("'" + FastSpring.FastSpringConstants.QUANTITY + "' invalid or not provided");
-        }
-
-        final Product product = ProductService.get(context, productNumber);
-        final LicenseTemplate licenseTemplate = LicenseTemplateService.get(context, licenseTemplateNumber);
-
-        boolean isNeedCreateNewLicensee = true;
-        Licensee licensee = new LicenseeImpl();
-        final String licenseeNumber = formParams.getFirst(Constants.NetLicensing.LICENSEE_NUMBER);
-        if (!StringUtils.isEmpty(licenseeNumber)) {
-            licensee = LicenseeService.get(context, licenseeNumber);
-            // if license template and licensee are bound to different products, need to create new licensee
-            isNeedCreateNewLicensee = isNeedCreateNewLicensee(licensee, productNumber);
-        }
-
-        // create licenses
-        for (int i = 1; i <= Integer.parseInt(quantity); i++) {
-            // create new Licensee, if not existing
-            if (isNeedCreateNewLicensee) {
-                isNeedCreateNewLicensee = false;
-                licensee = new LicenseeImpl();
-                if (isSaveUserData) {
-                    addCustomPropertiesToLicensee(formParams, licensee);
-                }
-                licensee.setActive(true);
-                licensee.setProduct(product);
-                licensee = LicenseeService.create(context, productNumber, licensee);
-            }
-            final License newLicense = new LicenseImpl();
-            newLicense.setActive(true);
-            // Required for timeVolume.
-            if (LicenseType.TIMEVOLUME.equals(licenseTemplate.getLicenseType())) {
-                newLicense.addProperty(Constants.NetLicensing.PROP_START_DATE, "now");
-            }
-            LicenseService.create(context, licensee.getNumber(), licenseTemplate.getNumber(), null, newLicense);
-
-            if (!licensees.contains(licensee.getNumber())) {
-                licensees.add(licensee.getNumber());
-            }
-        }
-        return StringUtils.join(licensees, "\n");
-    }
-
-    public String getErrorLog(final Context context, final String productNumber) throws NetLicensingException {
-        ProductService.get(context, productNumber);// dummy request
-
-        List<StoredLog> logs;
-
-        logs = persistingLogger.getLogsByKey(productNumber);
-
-        final StringBuilder logStringBuilder = new StringBuilder();
-        if (logs.isEmpty()) {
-            logStringBuilder.append("No log entires for ");
-            logStringBuilder.append(Constants.NetLicensing.PRODUCT_NUMBER);
-            logStringBuilder.append("=");
-            logStringBuilder.append(productNumber);
-            logStringBuilder.append(" within last ");
-            logStringBuilder.append(Constants.LOG_PERSIST_DAYS);
-            logStringBuilder.append(" days.");
-        } else {
-            for (final StoredLog log : logs) {
-                logStringBuilder.append(log.getTimestamp());
-                logStringBuilder.append(" ");
-                logStringBuilder.append(log.getSeverity());
-                logStringBuilder.append(" ");
-                logStringBuilder.append(log.getMessage());
-                logStringBuilder.append("\n");
-            }
-        }
-        return logStringBuilder.toString();
-    }
-
-    private boolean isNeedCreateNewLicensee(final Licensee licensee, final String productNumber) {
-        boolean isNeedCreateNewLicensee = false;
-        if (licensee != null) {
-            if (!licensee.getProduct().getNumber().equals(productNumber)) {
-                isNeedCreateNewLicensee = true;
-            }
-        } else {
-            isNeedCreateNewLicensee = true;
-        }
-        return isNeedCreateNewLicensee;
-    }
-
-    private void addCustomPropertiesToLicensee(final MultivaluedMap<String, String> formParams,
-            final Licensee licensee) {
-        for (final Map.Entry<String, List<String>> entry : formParams.entrySet()) {
-            if (!LicenseeImpl.getReservedProps().contains(entry.getKey()) && !entry.getValue().get(0).equals("")) {
-                licensee.addProperty(entry.getKey(), entry.getValue().get(0));
-            }
-        }
-    }
-
     private static String md5Custom(String st) {
         MessageDigest messageDigest = null;
         byte[] digest = new byte[0];
@@ -217,4 +178,28 @@ public class FastSpring {
 
         return md5Hex.toString();
     }
+
+    private void persistPurchaseLicenseeMapping(final String licenseeNumber, final String reference,
+            final String productNumber) {
+        FastSpringPurchase fastSpringPurchase = fastSpringPurchaseRepository.findFirstByReferenceAndProductNumber(
+                reference, productNumber);
+        if (fastSpringPurchase == null) {
+            fastSpringPurchase = new FastSpringPurchase();
+            fastSpringPurchase.setLicenseeNumber(licenseeNumber);
+            fastSpringPurchase.setReference(reference);
+            fastSpringPurchase.setProductNumber(productNumber);
+        }
+        fastSpringPurchase.setTimestamp(new Date());
+        fastSpringPurchaseRepository.save(fastSpringPurchase);
+    }
+
+    private void removeExpiredPurchaseLicenseeMappings() {
+        if (timeStampTracker.isTimeOutExpired(FastSpring.FastSpringConstants.NEXT_CLEANUP_TAG,
+                Constants.CLEANUP_PERIOD_MINUTES)) {
+            final Calendar earliestPersistTime = Calendar.getInstance();
+            earliestPersistTime.add(Calendar.DATE, -FastSpring.FastSpringConstants.PERSIST_PURCHASE_DAYS);
+            fastSpringPurchaseRepository.deleteByTimestampBefore(earliestPersistTime.getTime());
+        }
+    }
+
 }
