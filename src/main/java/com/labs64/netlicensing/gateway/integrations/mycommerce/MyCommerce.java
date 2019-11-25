@@ -22,6 +22,7 @@ import com.labs64.netlicensing.domain.vo.Context;
 import com.labs64.netlicensing.exception.NetLicensingException;
 import com.labs64.netlicensing.gateway.bl.EntityUtils;
 import com.labs64.netlicensing.gateway.bl.TimeStampTracker;
+import com.labs64.netlicensing.gateway.integrations.common.BaseException;
 import com.labs64.netlicensing.gateway.integrations.common.BaseIntegration;
 import com.labs64.netlicensing.gateway.util.Constants;
 import com.labs64.netlicensing.service.LicenseeService;
@@ -121,6 +122,8 @@ public class MyCommerce extends BaseIntegration {
          * custom field from myCommerce (licenseeNumber)
          */
         public static final String LICENSEE_NUMBER = "ADD[LICENSEENUMBER]";
+
+        public static final String CUSTOM_PROPERTY_KEY = "MyCommerceUserData";
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MyCommerce.class);
@@ -139,16 +142,16 @@ public class MyCommerce extends BaseIntegration {
 
         final List<String> licensees = new ArrayList<>();
         if (formParams.isEmpty() || licenseTemplateList.isEmpty()) {
-            throw new MyCommerceException("Required parameters not provided");
+            throw new BaseException("Required parameters not provided");
         }
         final String licenseeNumber = formParams.getFirst(MyCommerce.MyCommerceConstants.LICENSEE_NUMBER);
         if (quantityToLicensee && licenseeNumber != null && !licenseeNumber.isEmpty()) {
-            throw new MyCommerceException("'" + MyCommerce.MyCommerceConstants.LICENSEE_NUMBER + "' is not allowed in '"
+            throw new BaseException("'" + MyCommerce.MyCommerceConstants.LICENSEE_NUMBER + "' is not allowed in '"
                     + Constants.QUANTITY_TO_LICENSEE + "' mode");
         }
         final String quantity = formParams.getFirst(MyCommerce.MyCommerceConstants.QUANTITY);
         if (quantity == null || quantity.isEmpty() || Integer.parseInt(quantity) < 1) {
-            throw new MyCommerceException("'" + MyCommerce.MyCommerceConstants.QUANTITY + "' invalid or not provided");
+            throw new BaseException("'" + MyCommerce.MyCommerceConstants.QUANTITY + "' invalid or not provided");
         }
 
         final Product product = ProductService.get(context, productNumber);
@@ -222,6 +225,21 @@ public class MyCommerce extends BaseIntegration {
             licensee = LicenseeService.get(context, licenseeNumber);
         }
         return licensee;
+    }
+
+    @Override
+    protected Licensee createLicensee(Context context, Product product, final MultivaluedMap<String, String> formParams)
+            throws NetLicensingException {
+        Licensee licensee = new LicenseeImpl();
+        if (formParams != null) {
+            EntityUtils.addCustomPropertiesToLicensee(formParams, licensee);
+            licensee.addProperty(MyCommerce.MyCommerceConstants.CUSTOM_PROPERTY_KEY,
+                    convertFormParamsToJson(formParams));
+        }
+        licensee.setActive(true);
+        licensee.setProduct(product);
+        licensee.addProperty(Constants.NetLicensing.PROP_MARKED_FOR_TRANSFER, "true");
+        return LicenseeService.create(context, product.getNumber(), licensee);
     }
 
 }

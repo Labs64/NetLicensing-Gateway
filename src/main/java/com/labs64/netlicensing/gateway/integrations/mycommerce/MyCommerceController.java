@@ -20,6 +20,7 @@ import com.labs64.netlicensing.domain.vo.Context;
 import com.labs64.netlicensing.gateway.bl.PersistingLogger;
 import com.labs64.netlicensing.gateway.controller.restful.AbstractBaseController;
 import com.labs64.netlicensing.gateway.domain.entity.StoredLog;
+import com.labs64.netlicensing.gateway.integrations.common.BaseException;
 import com.labs64.netlicensing.gateway.util.Constants;
 
 @Component
@@ -47,20 +48,20 @@ public class MyCommerceController extends AbstractBaseController {
         if (purchaseId == null) {
             final String message = "'" + MyCommerce.MyCommerceConstants.PURCHASE_ID + "' is not provided";
             persistingLogger.log(productNumber, null, StoredLog.Severity.ERROR, message);
-            throw new MyCommerceException(message);
+            throw new BaseException(message);
         }
 
         try {
             final Context context = getSecurityHelper().getContext();
             return myCommerce.codeGenerator(context, purchaseId, productNumber, licenseTemplateList, quantityToLicensee,
                     isSaveUserData, formParams);
-        } catch (final MyCommerceException e) {
+        } catch (final BaseException e) {
             persistingLogger.log(productNumber, purchaseId, StoredLog.Severity.ERROR,
                     e.getResponse().getEntity().toString());
             throw e;
         } catch (final Exception e) {
             persistingLogger.log(productNumber, purchaseId, StoredLog.Severity.ERROR, e.getMessage());
-            throw new MyCommerceException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 
@@ -73,7 +74,7 @@ public class MyCommerceController extends AbstractBaseController {
             return myCommerce.getErrorLog(context, productNumber, purchaseId,
                     MyCommerce.MyCommerceConstants.PURCHASE_ID);
         } catch (final Exception e) {
-            throw new MyCommerceException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 

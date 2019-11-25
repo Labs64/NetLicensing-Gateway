@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.ws.rs.core.MultivaluedMap;
 
+import org.json.simple.JSONValue;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -13,16 +14,13 @@ import com.labs64.netlicensing.domain.entity.LicenseTemplate;
 import com.labs64.netlicensing.domain.entity.Licensee;
 import com.labs64.netlicensing.domain.entity.Product;
 import com.labs64.netlicensing.domain.entity.impl.LicenseImpl;
-import com.labs64.netlicensing.domain.entity.impl.LicenseeImpl;
 import com.labs64.netlicensing.domain.vo.Context;
 import com.labs64.netlicensing.domain.vo.LicenseType;
 import com.labs64.netlicensing.exception.NetLicensingException;
-import com.labs64.netlicensing.gateway.bl.EntityUtils;
 import com.labs64.netlicensing.gateway.bl.PersistingLogger;
 import com.labs64.netlicensing.gateway.domain.entity.StoredLog;
 import com.labs64.netlicensing.gateway.util.Constants;
 import com.labs64.netlicensing.service.LicenseService;
-import com.labs64.netlicensing.service.LicenseeService;
 import com.labs64.netlicensing.service.ProductService;
 
 public abstract class BaseIntegration {
@@ -91,17 +89,8 @@ public abstract class BaseIntegration {
         }
     }
 
-    protected Licensee createLicensee(Context context, Product product, final MultivaluedMap<String, String> formParams)
-            throws NetLicensingException {
-        Licensee licensee = new LicenseeImpl();
-        if (formParams != null) {
-            EntityUtils.addCustomPropertiesToLicensee(formParams, licensee);
-        }
-        licensee.setActive(true);
-        licensee.setProduct(product);
-        licensee.addProperty(Constants.NetLicensing.PROP_MARKED_FOR_TRANSFER, "true");
-        return LicenseeService.create(context, product.getNumber(), licensee);
-    }
+    protected abstract Licensee createLicensee(Context context, Product product,
+            final MultivaluedMap<String, String> formParams) throws NetLicensingException;
 
     protected static boolean isNeedCreateNewLicensee(final Licensee licensee, final String productNumber) {
         boolean isNeedCreateNewLicensee = false;
@@ -113,6 +102,10 @@ public abstract class BaseIntegration {
             isNeedCreateNewLicensee = true;
         }
         return isNeedCreateNewLicensee;
+    }
+
+    protected String convertFormParamsToJson(final MultivaluedMap<String, String> formParams) {
+        return JSONValue.toJSONString(formParams);
     }
 
 }

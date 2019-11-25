@@ -28,6 +28,7 @@ import com.labs64.netlicensing.domain.vo.Context;
 import com.labs64.netlicensing.exception.NetLicensingException;
 import com.labs64.netlicensing.gateway.bl.EntityUtils;
 import com.labs64.netlicensing.gateway.bl.TimeStampTracker;
+import com.labs64.netlicensing.gateway.integrations.common.BaseException;
 import com.labs64.netlicensing.gateway.integrations.common.BaseIntegration;
 import com.labs64.netlicensing.gateway.util.Constants;
 import com.labs64.netlicensing.service.LicenseeService;
@@ -38,9 +39,10 @@ import com.labs64.netlicensing.service.TokenService;
 public class FastSpring extends BaseIntegration {
 
     static final class FastSpringConstants {
-        public static final String NEXT_CLEANUP_TAG = "FastSpringNextCleanup";
-        public static final int PERSIST_PURCHASE_DAYS = 3;
+        static final String NEXT_CLEANUP_TAG = "FastSpringNextCleanup";
+        static final int PERSIST_PURCHASE_DAYS = 3;
 
+        static final String CUSTOM_PROPERTY_KEY = "fastSpringUserData";
         static final String ENDPOINT_BASE_PATH = "fastspring";
         static final String SECURITY_REQUEST_HASH = "security_request_hash";
         static final String API_KEY = "apiKey";
@@ -66,16 +68,16 @@ public class FastSpring extends BaseIntegration {
 
         final List<String> licensees = new ArrayList<>();
         if (formParams.isEmpty() || licenseTemplateList.isEmpty()) {
-            throw new FastSpringException("Required parameters not provided");
+            throw new BaseException("Required parameters not provided");
         }
         final String licenseeNumber = formParams.getFirst(Constants.NetLicensing.LICENSEE_NUMBER);
         if (quantityToLicensee && !StringUtils.isEmpty(licenseeNumber)) {
-            throw new FastSpringException("'" + Constants.NetLicensing.LICENSEE_NUMBER + "' is not allowed in '"
+            throw new BaseException("'" + Constants.NetLicensing.LICENSEE_NUMBER + "' is not allowed in '"
                     + Constants.QUANTITY_TO_LICENSEE + "' mode");
         }
         final String quantity = formParams.getFirst(FastSpring.FastSpringConstants.QUANTITY);
         if (quantity == null || quantity.isEmpty() || Integer.parseInt(quantity) < 1) {
-            throw new FastSpringException("'" + FastSpring.FastSpringConstants.QUANTITY + "' invalid or not provided");
+            throw new BaseException("'" + FastSpring.FastSpringConstants.QUANTITY + "' invalid or not provided");
         }
 
         final Product product = ProductService.get(context, productNumber);
@@ -108,7 +110,21 @@ public class FastSpring extends BaseIntegration {
             persistPurchaseLicenseeMapping(licensee.getNumber(), reference, productNumber);
             removeExpiredPurchaseLicenseeMappings();
         }
-        return StringUtils.join(licensees, "\n");
+        return "\n" + StringUtils.join(licensees, "\n");
+    }
+
+    @Override
+    protected Licensee createLicensee(Context context, Product product, final MultivaluedMap<String, String> formParams)
+            throws NetLicensingException {
+        Licensee licensee = new LicenseeImpl();
+        if (formParams != null) {
+            licensee.addProperty(FastSpring.FastSpringConstants.CUSTOM_PROPERTY_KEY,
+                    convertFormParamsToJson(formParams));
+        }
+        licensee.setActive(true);
+        licensee.setProduct(product);
+        licensee.addProperty(Constants.NetLicensing.PROP_MARKED_FOR_TRANSFER, "true");// todo: need?
+        return LicenseeService.create(context, product.getNumber(), licensee);
     }
 
     private Licensee getExistingLicensee(final Context context, String licenseeNumber, final String reference,

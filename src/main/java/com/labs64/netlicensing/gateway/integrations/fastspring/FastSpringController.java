@@ -23,6 +23,7 @@ import com.labs64.netlicensing.exception.NetLicensingException;
 import com.labs64.netlicensing.gateway.bl.PersistingLogger;
 import com.labs64.netlicensing.gateway.controller.restful.AbstractBaseController;
 import com.labs64.netlicensing.gateway.domain.entity.StoredLog;
+import com.labs64.netlicensing.gateway.integrations.common.BaseException;
 import com.labs64.netlicensing.gateway.util.Constants;
 import com.labs64.netlicensing.gateway.util.security.SecurityHelper;
 
@@ -47,18 +48,18 @@ public class FastSpringController extends AbstractBaseController {
 
         final String apiKey = formParams.getFirst(FastSpring.FastSpringConstants.API_KEY);
         if (apiKey.isEmpty()) {
-            throw new FastSpringException("'" + FastSpring.FastSpringConstants.API_KEY + "' parameter is required");
+            throw new BaseException("'" + FastSpring.FastSpringConstants.API_KEY + "' parameter is required");
         }
         context.setSecurityMode(SecurityMode.APIKEY_IDENTIFICATION);
         context.setApiKey(apiKey);
 
         //auth
         if (!fastSpring.isPrivateKeyValid(context, formParams)) {
-            throw new FastSpringException(FastSpring.FastSpringConstants.PRIVATE_KEY + "s are not matches");
+            throw new BaseException(FastSpring.FastSpringConstants.PRIVATE_KEY + "s are not matches");
         }
 
         if (!SecurityHelper.checkContextConnection(context)) {
-            throw new FastSpringException("Wrong " + FastSpring.FastSpringConstants.API_KEY + " provided");
+            throw new BaseException("Wrong " + FastSpring.FastSpringConstants.API_KEY + " provided");
         }
 
         final String reference = formParams.getFirst(FastSpring.FastSpringConstants.REFERENCE);
@@ -68,13 +69,13 @@ public class FastSpringController extends AbstractBaseController {
                 formParams.getFirst(FastSpring.FastSpringConstants.LICENSE_TEMPLATE_LIST).split("\\s*,\\s*"));
 
         if (StringUtils.isEmpty(productNumber) || licenseTemplateList.isEmpty()) {
-            throw new FastSpringException("Required parameters not provided");
+            throw new BaseException("Required parameters not provided");
         }
 
         if (StringUtils.isEmpty(reference)) {
             final String message = "'" + FastSpring.FastSpringConstants.REFERENCE + "' is not provided";
             persistingLogger.log(productNumber, null, StoredLog.Severity.ERROR, message);
-            throw new FastSpringException(message);
+            throw new BaseException(message);
         }
 
         //default false
@@ -86,13 +87,13 @@ public class FastSpringController extends AbstractBaseController {
         try {
             return fastSpring.codeGenerator(context, reference, productNumber, licenseTemplateList, quantityToLicensee,
                     isSaveUserData, formParams);
-        } catch (final FastSpringException e) {
+        } catch (final BaseException e) {
             persistingLogger.log(productNumber, reference, StoredLog.Severity.ERROR,
                     e.getResponse().getEntity().toString());
             throw e;
         } catch (final Exception e) {
             persistingLogger.log(productNumber, reference, StoredLog.Severity.ERROR, e.getMessage());
-            throw new FastSpringException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 
@@ -104,7 +105,7 @@ public class FastSpringController extends AbstractBaseController {
             final Context context = getSecurityHelper().getContext();
             return fastSpring.getErrorLog(context, productNumber, reference, FastSpring.FastSpringConstants.REFERENCE);
         } catch (final Exception e) {
-            throw new FastSpringException(e.getMessage());
+            throw new BaseException(e.getMessage());
         }
     }
 }
