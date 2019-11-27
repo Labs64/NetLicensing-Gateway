@@ -6,7 +6,6 @@
         version="2.1">
     <persistence-unit name="nlicGateWayJPA" transaction-type="RESOURCE_LOCAL">
         <class>com.labs64.netlicensing.gateway.integrations.mycommerce.MyCommercePurchase</class>
-        <class>com.labs64.netlicensing.gateway.integrations.fastspring.FastSpringPurchase</class>
         <class>com.labs64.netlicensing.gateway.domain.entity.TimeStamp</class>
         <class>com.labs64.netlicensing.gateway.domain.entity.StoredLog</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>

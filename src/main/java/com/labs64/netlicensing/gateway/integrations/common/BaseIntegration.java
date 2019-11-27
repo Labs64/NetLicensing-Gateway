@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.ws.rs.core.MultivaluedMap;
 
+import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -106,6 +107,10 @@ public abstract class BaseIntegration {
 
     protected String convertFormParamsToJson(final MultivaluedMap<String, String> formParams) {
         return JSONValue.toJSONString(formParams);
+    }
+
+    protected JSONObject convertFormParamsFromJson(String jsonString) {
+        return (JSONObject) JSONValue.parse(jsonString);
     }
 
 }

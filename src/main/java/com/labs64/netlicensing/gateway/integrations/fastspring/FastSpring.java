@@ -4,8 +4,6 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
@@ -16,7 +14,6 @@ import javax.ws.rs.core.MultivaluedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.labs64.netlicensing.domain.entity.LicenseTemplate;
@@ -27,7 +24,6 @@ import com.labs64.netlicensing.domain.entity.impl.LicenseeImpl;
 import com.labs64.netlicensing.domain.vo.Context;
 import com.labs64.netlicensing.exception.NetLicensingException;
 import com.labs64.netlicensing.gateway.bl.EntityUtils;
-import com.labs64.netlicensing.gateway.bl.TimeStampTracker;
 import com.labs64.netlicensing.gateway.integrations.common.BaseException;
 import com.labs64.netlicensing.gateway.integrations.common.BaseIntegration;
 import com.labs64.netlicensing.gateway.util.Constants;
@@ -39,9 +35,6 @@ import com.labs64.netlicensing.service.TokenService;
 public class FastSpring extends BaseIntegration {
 
     static final class FastSpringConstants {
-        static final String NEXT_CLEANUP_TAG = "FastSpringNextCleanup";
-        static final int PERSIST_PURCHASE_DAYS = 3;
-
         static final String CUSTOM_PROPERTY_KEY = "fastSpringUserData";
         static final String ENDPOINT_BASE_PATH = "fastspring";
         static final String SECURITY_REQUEST_HASH = "security_request_hash";
@@ -49,16 +42,11 @@ public class FastSpring extends BaseIntegration {
         static final String PRIVATE_KEY = "privateKey";
         static final String QUANTITY = "quantity";
         static final String REFERENCE = "reference";
+        static final String TAGS = "tags";
         static final String LICENSE_TEMPLATE_LIST = "licenseTemplateList";
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FastSpring.class);
-
-    @Autowired
-    private TimeStampTracker timeStampTracker;
-
-    @Autowired
-    private FastSpringPurchaseRepository fastSpringPurchaseRepository;
 
     public String codeGenerator(final Context context, final String reference, final String productNumber,
             final List<String> licenseTemplateList, final boolean quantityToLicensee, final boolean isSaveUserData,
@@ -70,7 +58,13 @@ public class FastSpring extends BaseIntegration {
         if (formParams.isEmpty() || licenseTemplateList.isEmpty()) {
             throw new BaseException("Required parameters not provided");
         }
-        final String licenseeNumber = formParams.getFirst(Constants.NetLicensing.LICENSEE_NUMBER);
+
+        // get licensee number from tags param
+        String licenseeNumber = "";
+        final String tags = formParams.getFirst(FastSpringConstants.TAGS);
+        if (!StringUtils.isEmpty(tags)) {
+            licenseeNumber = (String) convertFormParamsFromJson(tags).get(Constants.NetLicensing.LICENSEE_NUMBER);
+        }
         if (quantityToLicensee && !StringUtils.isEmpty(licenseeNumber)) {
             throw new BaseException("'" + Constants.NetLicensing.LICENSEE_NUMBER + "' is not allowed in '"
                     + Constants.QUANTITY_TO_LICENSEE + "' mode");
@@ -88,7 +82,7 @@ public class FastSpring extends BaseIntegration {
 
         // try to get existing Licensee
         if (!quantityToLicensee) {
-            licensee = getExistingLicensee(context, licenseeNumber, reference, productNumber);
+            licensee = getExistingLicensee(context, licenseeNumber);
             // if license template and licensee are bound to different products, need to create new licensee
             isNeedCreateNewLicensee = isNeedCreateNewLicensee(licensee, productNumber);
         }
@@ -106,10 +100,6 @@ public class FastSpring extends BaseIntegration {
                 licensees.add(licensee.getNumber());
             }
         }
-        if (!quantityToLicensee) {
-            persistPurchaseLicenseeMapping(licensee.getNumber(), reference, productNumber);
-            removeExpiredPurchaseLicenseeMappings();
-        }
         return "\n" + StringUtils.join(licensees, "\n");
     }
 
@@ -123,21 +113,12 @@ public class FastSpring extends BaseIntegration {
         }
         licensee.setActive(true);
         licensee.setProduct(product);
-        licensee.addProperty(Constants.NetLicensing.PROP_MARKED_FOR_TRANSFER, "true");// todo: need?
+        licensee.addProperty(Constants.NetLicensing.PROP_MARKED_FOR_TRANSFER, "true");
         return LicenseeService.create(context, product.getNumber(), licensee);
     }
 
-    private Licensee getExistingLicensee(final Context context, String licenseeNumber, final String reference,
-            final String productNumber) throws NetLicensingException {
+    private Licensee getExistingLicensee(final Context context, String licenseeNumber) throws NetLicensingException {
         Licensee licensee = null;
-        if (StringUtils.isBlank(licenseeNumber)) { // licenseeNumber is not provided, get from database
-            final FastSpringPurchase fastSpringPurchase = fastSpringPurchaseRepository.findFirstByReferenceAndProductNumber(
-                    reference, productNumber);
-            if (fastSpringPurchase != null) {
-                licenseeNumber = fastSpringPurchase.getLicenseeNumber();
-                LOGGER.info("licenseeNumber obtained from repository: {}", licenseeNumber);
-            }
-        }
         if (StringUtils.isNotBlank(licenseeNumber)) {
             licensee = LicenseeService.get(context, licenseeNumber);
         }
@@ -194,28 +175,4 @@ public class FastSpring extends BaseIntegration {
 
         return md5Hex.toString();
     }
-
-    private void persistPurchaseLicenseeMapping(final String licenseeNumber, final String reference,
-            final String productNumber) {
-        FastSpringPurchase fastSpringPurchase = fastSpringPurchaseRepository.findFirstByReferenceAndProductNumber(
-                reference, productNumber);
-        if (fastSpringPurchase == null) {
-            fastSpringPurchase = new FastSpringPurchase();
-            fastSpringPurchase.setLicenseeNumber(licenseeNumber);
-            fastSpringPurchase.setReference(reference);
-            fastSpringPurchase.setProductNumber(productNumber);
-        }
-        fastSpringPurchase.setTimestamp(new Date());
-        fastSpringPurchaseRepository.save(fastSpringPurchase);
-    }
-
-    private void removeExpiredPurchaseLicenseeMappings() {
-        if (timeStampTracker.isTimeOutExpired(FastSpring.FastSpringConstants.NEXT_CLEANUP_TAG,
-                Constants.CLEANUP_PERIOD_MINUTES)) {
-            final Calendar earliestPersistTime = Calendar.getInstance();
-            earliestPersistTime.add(Calendar.DATE, -FastSpring.FastSpringConstants.PERSIST_PURCHASE_DAYS);
-            fastSpringPurchaseRepository.deleteByTimestampBefore(earliestPersistTime.getTime());
-        }
-    }
-
 }
