@@ -44,7 +44,6 @@ public class FastSpringController extends AbstractBaseController {
     public String codeGenerator(final MultivaluedMap<String, String> formParams) throws NetLicensingException {
 
         final Context context = getSecurityHelper().getContext();
-        context.setBaseUrl("http://localhost:28080/core/v2/rest"); // TODO(AY): TEMP
 
         final String apiKey = formParams.getFirst(FastSpring.FastSpringConstants.API_KEY);
         if (apiKey.isEmpty()) {
