@@ -2,7 +2,8 @@
 
 # Labs64 NetLicensing / eCommerce Gateway
 
-[![Build Status](https://travis-ci.org/Labs64/NetLicensing-Gateway.svg?branch=master)](https://travis-ci.org/Labs64/NetLicensing-Gateway)
+[![NetLicensing Gateway - CI](https://github.com/Labs64/NetLicensing-Gateway/workflows/NetLicensing%20Gateway%20-%20CI/badge.svg)](https://github.com/Labs64/NetLicensing-Gateway/actions?query=workflow%3A%22NetLicensing+Gateway+-+CI%22)
+
 
 [Labs64 NetLicensing](https://netlicensing.io) is a first-class solution in the Licensing as a Service (LaaS) sector. Based on open standards, it provides a cost effective, integrated and scalable platform for software vendors and developers who want to concentrate on their product’s core functionality instead of spending resources on developing an own license management software.
 
