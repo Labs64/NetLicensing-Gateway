@@ -18,7 +18,7 @@ After a successful transaction, all needed licensing configuration (Customers, L
 There are various ways available on how to enable NetLicensing Gateway in your licensing flow:
 
 - Centrally hosted instance available at [gateway.netlicensing.io](https://gateway.netlicensing.io/monitoring)
-- Your individual instance from Docker image (check *Docker* and *Docker Compose* instructions below)
+- Your individual instance from Docker image (check [Docker](#docker) and [Docker Compose](#docker-compose) instructions below)
 
 ### Docker
 

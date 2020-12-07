@@ -10,15 +10,19 @@ Contributions are welcome, and are accepted via pull requests. Please review the
 
 Prerequisites:
 
-- install [Docker](https://docs.docker.com/install/) on you host
+- install [Docker](https://docs.docker.com/install/) on you host machine
 
-To build the docker image execute:
+#### Build local docker image
 
 ```
 $ docker image build -t labs64/netlicensing-gateway .
 ```
 
-### Use standalone container
+... and start your local container using Docler or Docker Compose
+
+### Docker
+
+#### Start standalone container (Docker)
 
 ```
 $ docker container run -d -it --publish 8080:8080 --name netlicensing-gateway labs64/netlicensing-gateway
@@ -26,17 +30,15 @@ $ docker container run -d -it --publish 8080:8080 --name netlicensing-gateway la
 
 Application can be accessed at [localhost:8080](http://localhost:8080)
 
-If needed, to access the admin console. Run docker container with the following command.
-
-Note: Tomcat user configuration is located in ./dockerfiles/conf/tomcat-users.xml
+To enable access to Tomcat admin console, run Docker container with the following command:
 
 ```
-$ docker container run -it -v $(pwd)/dockerfiles/conf/tomcat-users.xml:/usr/local/tomcat/conf/tomcat-users.xml --publish 8080:8080 labs64/netlicensing-gateway
+$ docker container run -d -it -v $(pwd)/dockerfiles/conf/tomcat-users.xml:/usr/local/tomcat/conf/tomcat-users.xml --publish 8080:8080 --name netlicensing-gateway labs64/netlicensing-gateway
 ```
 
-### Use docker-compose (Tomcat + ngrok)
+### Docker Compose (Tomcat + ngrok)
 
-Start environment:
+#### Start environment
 
 ```
 $ docker-compose up -d
@@ -44,7 +46,7 @@ $ docker-compose up -d
 
 The ngrok monitoring endpoint can be accessed at [127.0.0.1:4040](http://127.0.0.1:4040)
 
-Stop environment:
+#### Stop environment
 
 ```
 $ docker-compose down
@@ -54,5 +56,5 @@ $ docker-compose down
 
 To verify whether your local development environment is up and running open following URLs in your browser:
 
-- localhost: http://localhost:8080/gateway/monitoring
-- ngrok: https://[ngrok-subdomain].ngrok.io/gateway/monitoring (Note: `ngrok-subdomain` will be different upon every environment start)
+- **gateway:** http://localhost:8080/gateway/monitoring
+- **ngrok:** https://[ngrok-subdomain].ngrok.io/gateway/monitoring (Note: `ngrok-subdomain` will be different upon every environment start)
