@@ -12,13 +12,19 @@ Prerequisites:
 
 - install [Docker](https://docs.docker.com/install/) on you host machine
 
+#### Clone repository
+
+```
+$ git clone https://github.com/Labs64/NetLicensing-Gateway.git
+```
+
 #### Build local docker image
 
 ```
 $ docker image build -t labs64/netlicensing-gateway .
 ```
 
-... and start your local container using Docler or Docker Compose
+... and start your local container using Docker or Docker Compose
 
 ### Docker
 

@@ -36,6 +36,13 @@ $ docker container run -d -it --publish 8080:8080 --name netlicensing-gateway la
 
 ### Docker Compose
 
+
+#### Clone repository
+
+```
+$ git clone https://github.com/Labs64/NetLicensing-Gateway.git
+```
+
 #### Start containers
 ```
 $ docker-compose up -d
@@ -60,7 +67,7 @@ Verify container configuration by opening monitoring endpoint at [http://localho
 ## Contributors
 
 New connectors' integrations as community implementation are highly appreciated and welcome.
-Please refer to [contributing instructions](CONTRIBUTING.md).
+Please refer to the [contributing instructions](CONTRIBUTING.md).
 
 ## Bugs and Feedback
 
