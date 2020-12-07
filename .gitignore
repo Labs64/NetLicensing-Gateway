@@ -2,7 +2,7 @@ _site/
 .sass-cache/
 .idea
 *.iml
-
+.vscode
 *.class
 
 # Mobile Tools for Java (J2ME)

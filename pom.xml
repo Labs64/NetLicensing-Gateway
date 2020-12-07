@@ -49,7 +49,7 @@
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
-        <maven.version>3.5.2</maven.version>
+        <maven.version>3.5.4</maven.version>
         <gateway.PROJECT_STAGE>${enum.project-stage.development}</gateway.PROJECT_STAGE>
 
         <repo.releases.url>OVERRIDE_REPO_URL</repo.releases.url>
@@ -81,7 +81,6 @@
         <maven-resources-plugin.version>3.1.0</maven-resources-plugin.version>
         <build-helper-maven-plugin.version>3.0.0</build-helper-maven-plugin.version>
         <license-maven-plugin.version>1.20</license-maven-plugin.version>
-        <swid-maven-plugin.version>0.1.0</swid-maven-plugin.version>
         <maven-checkstyle-plugin.version>3.1.0</maven-checkstyle-plugin.version>
         <findbugs-maven-plugin.version>3.0.5</findbugs-maven-plugin.version>
         <maven-pmd-plugin.version>3.12.0</maven-pmd-plugin.version>
@@ -372,15 +371,6 @@
                     <licensesOutputFile>
                         ${project.build.directory}/${project.build.finalName}/licenses/licenses.xml
                     </licensesOutputFile>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>com.labs64.mojo</groupId>
-                <artifactId>swid-maven-plugin</artifactId>
-                <version>${swid-maven-plugin.version}</version>
-                <configuration>
-                    <domain_creation_date>2010-04</domain_creation_date>
                 </configuration>
             </plugin>
         </plugins>

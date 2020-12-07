@@ -30,7 +30,7 @@ Where `labs64` and `gateway` are _company_name_ and _app_image_name_.
 ```
 $ docker container run -it --publish 8081:8080 labs64/gateway
 ```
-Application can be accessed at [http://localhost:8081](http://localhost:8081)
+Application can be accessed at [localhost:8081](http://localhost:8081)
 
 If needed, to access the admin console. Run docker container with the following command.
 
@@ -47,7 +47,7 @@ Start environment:
 $ docker-compose up -d
 ```
 
-The ngrok monitoring endpoint can be accessed at [http://127.0.0.1:4040](http://127.0.0.1:4040)
+The ngrok monitoring endpoint can be accessed at [127.0.0.1:4040](http://127.0.0.1:4040)
 
 Stop environment:
 ```
