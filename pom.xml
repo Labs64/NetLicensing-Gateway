@@ -70,6 +70,7 @@
         <junit.version>4.13.1</junit.version>
         <h2database.version>1.4.199</h2database.version>
         <eclipselink.version>2.7.4</eclipselink.version>
+        <json-simple.version>1.1.1</json-simple.version>
 
         <!-- plugin.version>0.0.0</plugin.version -->
         <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
@@ -134,7 +135,7 @@
         <dependency>
             <groupId>com.googlecode.json-simple</groupId>
             <artifactId>json-simple</artifactId>
-            <version>1.1.1</version>
+            <version>${json-simple.version}</version>
         </dependency>
 
         <!-- database -->
@@ -161,7 +162,7 @@
             <artifactId>jersey-client</artifactId>
             <version>${jersey.version}</version>
         </dependency>
-        <dependency> <!-- from 2.16 on: https://jersey.java.net/documentation/latest/migration.html#mig-2.16 -->
+        <dependency>
             <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-jaxb</artifactId>
             <version>${jersey.version}</version>
