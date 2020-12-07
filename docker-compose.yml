@@ -1,7 +1,7 @@
-version: '3'
+version: "3"
 services:
-  gateway-app:
-    build: ./
+  netlicensing-gateway:
+    image: "labs64/netlicensing-gateway"
     ports:
       - "8080:8080"
   ngrok:
@@ -12,6 +12,6 @@ services:
       - /bin/sh
       - -c
       - |
-        ngrok http gateway-app:8080
+        ngrok http netlicensing-gateway:8080
     depends_on:
-      - gateway-app
+      - netlicensing-gateway
