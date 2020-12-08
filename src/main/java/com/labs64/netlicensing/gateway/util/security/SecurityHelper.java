@@ -17,8 +17,8 @@ import com.labs64.netlicensing.service.UtilityService;
 public final class SecurityHelper {
 
     private String nlicBaseUrl;
-    private String nlicDemoUser;
-    private String nlicDemoPass;
+    private String nlicMonitoringUser;
+    private String nlicMonitoringPass;
 
     public class GWClientConfiguration implements RestProvider.Configuration {
 
@@ -40,13 +40,13 @@ public final class SecurityHelper {
     }
 
     @Required
-    public void setNlicDemoUser(final String nlicDemoUser) {
-        this.nlicDemoUser = nlicDemoUser;
+    public void setNlicMonitoringUser(final String nlicMonitoringUser) {
+        this.nlicMonitoringUser = nlicMonitoringUser;
     }
 
     @Required
-    public void setNlicDemoPass(final String nlicDemoPass) {
-        this.nlicDemoPass = nlicDemoPass;
+    public void setNlicMonitoringPass(final String nlicMonitoringPass) {
+        this.nlicMonitoringPass = nlicMonitoringPass;
     }
 
     public Context getContext() {
@@ -69,12 +69,12 @@ public final class SecurityHelper {
         return context;
     }
 
-    public Context getDemoContext() {
+    public Context getMonitoringContext() {
         final Context context = new Context();
         context.setBaseUrl(nlicBaseUrl);
         context.setSecurityMode(SecurityMode.BASIC_AUTHENTICATION);
-        context.setUsername(nlicDemoUser);
-        context.setPassword(nlicDemoPass);
+        context.setUsername(nlicMonitoringUser);
+        context.setPassword(nlicMonitoringPass);
         context.setObject(RestProvider.Configuration.class, new GWClientConfiguration());
         return context;
     }

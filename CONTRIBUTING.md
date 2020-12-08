@@ -50,7 +50,7 @@ $ docker container run -d -it -v $(pwd)/dockerfiles/conf/tomcat-users.xml:/usr/l
 $ docker-compose up -d
 ```
 
-The ngrok monitoring endpoint can be accessed at [127.0.0.1:4040](http://127.0.0.1:4040)
+The ngrok monitoring endpoint can be accessed at [localhost:4040](http://localhost:4040)
 
 #### Stop environment
 

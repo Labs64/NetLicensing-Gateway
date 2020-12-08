@@ -52,9 +52,8 @@ public class FastSpringController extends AbstractBaseController {
         context.setSecurityMode(SecurityMode.APIKEY_IDENTIFICATION);
         context.setApiKey(apiKey);
 
-        //auth
         if (!fastSpring.isPrivateKeyValid(context, formParams)) {
-            throw new BaseException(FastSpring.FastSpringConstants.PRIVATE_KEY + "s are not matches");
+            throw new BaseException("Property '" + FastSpring.FastSpringConstants.PRIVATE_KEY + "' do not match");
         }
 
         if (!SecurityHelper.checkContextConnection(context)) {

@@ -39,7 +39,7 @@ public class FastSpring extends BaseIntegration {
         static final String ENDPOINT_BASE_PATH = "fastspring";
         static final String SECURITY_REQUEST_HASH = "security_request_hash";
         static final String API_KEY = "apiKey";
-        static final String PRIVATE_KEY = "privateKey";
+        static final String PRIVATE_KEY = "fastspringPrivateKey";
         static final String QUANTITY = "quantity";
         static final String REFERENCE = "reference";
         static final String TAGS = "tags";

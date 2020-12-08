@@ -36,6 +36,9 @@ $ docker container run -d -it --publish 8080:8080 --name netlicensing-gateway la
 
 ### Docker Compose
 
+Additionally to the main NetLicensing Gateway instance, Docker Compose  includes various helper tools needed for local testing and eCommerce connectors development:
+
+- [Ngrok](https://ngrok.com) - expose local NetLicensing Gateway endpoints as public URLs, to allow eCommerce fulfilment webhook tests.
 
 #### Clone repository
 
@@ -62,7 +65,7 @@ Verify container configuration by opening monitoring endpoint at [http://localho
 
 #### Connectors tests
 
-*TODO*
+Refer to the eCommerce connectors [setup and configuration guides](https://github.com/Labs64/NetLicensing-Gateway/wiki).
 
 ## Contributors
 
