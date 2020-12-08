@@ -18,6 +18,7 @@ public class Constants {
         public static final String PRODUCT_NUMBER = "productNumber";
         public static final String LICENSE_TEMPLATE_NUMBER = "licenseTemplateNumber";
         public static final String LICENSEE_NUMBER = "licenseeNumber";
+        public static final String LICENSEE_NAME = "name";
         public static final String PROP_MARKED_FOR_TRANSFER = "markedForTransfer";
         public static final String PROP_START_DATE = "startDate";
     }

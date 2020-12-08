@@ -43,6 +43,7 @@ public class FastSpring extends BaseIntegration {
         static final String QUANTITY = "quantity";
         static final String REFERENCE = "reference";
         static final String TAGS = "tags";
+        static final String NAME = "name";
         static final String LICENSE_TEMPLATE_LIST = "licenseTemplateList";
     }
 
@@ -62,15 +63,15 @@ public class FastSpring extends BaseIntegration {
         // get licensee number from tags param
         String licenseeNumber = "";
         final String tags = formParams.getFirst(FastSpringConstants.TAGS);
-        if (!StringUtils.isEmpty(tags)) {
+        if (StringUtils.isNotBlank(tags)) {
             licenseeNumber = (String) convertFormParamsFromJson(tags).get(Constants.NetLicensing.LICENSEE_NUMBER);
         }
-        if (quantityToLicensee && !StringUtils.isEmpty(licenseeNumber)) {
+        if (quantityToLicensee && StringUtils.isNotBlank(licenseeNumber)) {
             throw new BaseException("'" + Constants.NetLicensing.LICENSEE_NUMBER + "' is not allowed in '"
                     + Constants.QUANTITY_TO_LICENSEE + "' mode");
         }
         final String quantity = formParams.getFirst(FastSpring.FastSpringConstants.QUANTITY);
-        if (quantity == null || quantity.isEmpty() || Integer.parseInt(quantity) < 1) {
+        if (StringUtils.isBlank(quantity) || Integer.parseInt(quantity) < 1) {
             throw new BaseException("'" + FastSpring.FastSpringConstants.QUANTITY + "' invalid or not provided");
         }
 
@@ -108,6 +109,7 @@ public class FastSpring extends BaseIntegration {
             throws NetLicensingException {
         Licensee licensee = new LicenseeImpl();
         if (formParams != null) {
+            licensee.addProperty(Constants.NetLicensing.LICENSEE_NAME, formParams.getFirst(FastSpring.FastSpringConstants.NAME));
             licensee.addProperty(FastSpring.FastSpringConstants.CUSTOM_PROPERTY_KEY,
                     convertFormParamsToJson(formParams));
         }
@@ -145,7 +147,7 @@ public class FastSpring extends BaseIntegration {
         SortedSet<String> keys = new TreeSet<>(formParams.keySet());
         for (String key : keys) {
             String value = formParams.getFirst(key);
-            if (!key.equals(FastSpring.FastSpringConstants.SECURITY_REQUEST_HASH)) {
+            if (!FastSpring.FastSpringConstants.SECURITY_REQUEST_HASH.equals(key)) {
                 data.append(value.replace("\\", ""));
             }
         }
@@ -175,4 +177,5 @@ public class FastSpring extends BaseIntegration {
 
         return md5Hex.toString();
     }
+
 }

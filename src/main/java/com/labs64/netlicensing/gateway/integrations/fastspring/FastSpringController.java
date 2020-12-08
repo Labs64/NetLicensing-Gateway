@@ -46,7 +46,7 @@ public class FastSpringController extends AbstractBaseController {
         final Context context = getSecurityHelper().getContext();
 
         final String apiKey = formParams.getFirst(FastSpring.FastSpringConstants.API_KEY);
-        if (apiKey.isEmpty()) {
+        if (StringUtils.isBlank(apiKey)) {
             throw new BaseException("'" + FastSpring.FastSpringConstants.API_KEY + "' parameter is required");
         }
         context.setSecurityMode(SecurityMode.APIKEY_IDENTIFICATION);
@@ -66,11 +66,11 @@ public class FastSpringController extends AbstractBaseController {
         final List<String> licenseTemplateList = Arrays.asList(
                 formParams.getFirst(FastSpring.FastSpringConstants.LICENSE_TEMPLATE_LIST).split("\\s*,\\s*"));
 
-        if (StringUtils.isEmpty(productNumber) || licenseTemplateList.isEmpty()) {
+        if (StringUtils.isBlank(productNumber) || licenseTemplateList.isEmpty()) {
             throw new BaseException("Required parameters not provided");
         }
 
-        if (StringUtils.isEmpty(reference)) {
+        if (StringUtils.isBlank(reference)) {
             final String message = "'" + FastSpring.FastSpringConstants.REFERENCE + "' is not provided";
             persistingLogger.log(productNumber, null, StoredLog.Severity.ERROR, message);
             throw new BaseException(message);
