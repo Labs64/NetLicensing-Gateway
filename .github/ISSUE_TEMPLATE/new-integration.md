@@ -20,7 +20,6 @@ ISV will be able to use NetLicensing Gateway integration with the chosen fronten
 ### References:
 
 - Typical e-commerce integration flow: https://github.com/Labs64/NetLicensing-Gateway#license-acquisition-flow
-- Sample implementation (MyCommerce): https://github.com/Labs64/NetLicensing-Gateway/blob/master/src/main/java/com/labs64/netlicensing/gateway/controller/restful/MyCommerceController.java
 - NetLicening RESTful API: https://netlicensing.io/wiki/restful-api
 - NetLicensing test account: `demo:demo` or your own
 - **E-commerce integration documentation:**
@@ -32,4 +31,4 @@ ISV will be able to use NetLicensing Gateway integration with the chosen fronten
 
 Feel free to contact us for support via:
 - Email: netlicensing@labs64.com
-- Telegram chat: https://t.me/netlicensing
+- NetLicensing Community Support: https://github.com/Labs64/NetLicensing-Community
