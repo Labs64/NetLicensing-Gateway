@@ -6,7 +6,6 @@
 [![NetLicensing Gateway Docker image](https://img.shields.io/badge/Docker-labs64%2Fnetlicensing--gateway-0db7ed.svg)](https://hub.docker.com/r/labs64/netlicensing-gateway)
 [![NetLicensing](https://img.shields.io/badge/NetLicensing-IO-E14817.svg?logo=NetLicensing)](https://netlicensing.io)
 [![📖 Documentation](https://img.shields.io/badge/📖%20Documentation-Wiki-AB6543.svg)](https://netlicensing.io/wiki/)
-[![NetLicensing @ LinkedIn](https://img.shields.io/badge/NetLicensing-0077B5.svg?logo=LinkedIn)](https://www.linkedin.com/showcase/netlicensing)
 
 Use any eCommerce platform, such as *FastSpring, MyCommerce, PrestaShop, SendOwl,* and many others as a license acquisition frontend.
 After a successful transaction, all needed licensing configuration (Customers, Licenses and all related data) will be made available in the NetLicensing and can be used for later entitlements validation in NetLicensing.
