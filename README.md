@@ -3,6 +3,7 @@
 # Labs64 NetLicensing / eCommerce Gateway
 
 [![NetLicensing Gateway - CI](https://github.com/Labs64/NetLicensing-Gateway/workflows/NetLicensing%20Gateway%20-%20CI/badge.svg)](https://github.com/Labs64/NetLicensing-Gateway/actions?query=workflow%3A%22NetLicensing+Gateway+-+CI%22)
+[![NetLicensing Gateway Docker image](https://img.shields.io/badge/Docker-labs64%2Fnetlicensing--gateway-0db7ed.svg)](https://hub.docker.com/r/labs64/netlicensing-gateway)
 [![NetLicensing](https://img.shields.io/badge/NetLicensing-IO-E14817.svg?logo=NetLicensing)](https://netlicensing.io)
 [![📖 Documentation](https://img.shields.io/badge/📖%20Documentation-Wiki-AB6543.svg)](https://netlicensing.io/wiki/)
 [![NetLicensing @ LinkedIn](https://img.shields.io/badge/NetLicensing-0077B5.svg?logo=LinkedIn)](https://www.linkedin.com/showcase/netlicensing)
