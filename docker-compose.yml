@@ -4,6 +4,8 @@ services:
     image: "labs64/netlicensing-gateway"
     ports:
       - "8080:8080"
+      - "8082:8082"
+      - "9092:9092"
   ngrok:
     image: "wernight/ngrok"
     ports:

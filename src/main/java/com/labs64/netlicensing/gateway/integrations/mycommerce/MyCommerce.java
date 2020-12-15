@@ -34,8 +34,6 @@ public class MyCommerce extends BaseIntegration {
     public static final class MyCommerceConstants {
         public static final String NEXT_CLEANUP_TAG = "MyCommerceNextCleanup";
 
-        public static final int PERSIST_PURCHASE_DAYS = 3;
-
         public static final String ENDPOINT_BASE_PATH = "mycommerce";
 
         /**
@@ -202,10 +200,10 @@ public class MyCommerce extends BaseIntegration {
     }
 
     private void removeExpiredPurchaseLicenseeMappings() {
-        if (timeStampTracker.isTimeOutExpired(MyCommerce.MyCommerceConstants.NEXT_CLEANUP_TAG,
+        if (timeStampTracker.isExpired(MyCommerce.MyCommerceConstants.NEXT_CLEANUP_TAG,
                 Constants.CLEANUP_PERIOD_MINUTES)) {
             final Calendar earliestPersistTime = Calendar.getInstance();
-            earliestPersistTime.add(Calendar.DATE, -MyCommerce.MyCommerceConstants.PERSIST_PURCHASE_DAYS);
+            earliestPersistTime.add(Calendar.DATE, Constants.LOG_PERSIST_DAYS * -1);
             myCommercePurchaseRepository.deleteByTimestampBefore(earliestPersistTime.getTime());
         }
     }

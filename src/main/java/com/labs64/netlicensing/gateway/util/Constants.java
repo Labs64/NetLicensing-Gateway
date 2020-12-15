@@ -5,8 +5,8 @@ public class Constants {
     private Constants() {
     }
 
+    public static final String NEXT_CLEANUP_LOGGING_TAG = "NEXT_CLEANUP_LOGGING";
     public static final int CLEANUP_PERIOD_MINUTES = 60;
-    public static final String LOG_NEXT_CLEANUP_TAG = "LogNextCleanup";
     public static final int LOG_PERSIST_DAYS = 30;
 
     public static final String QUANTITY_TO_LICENSEE = "quantityToLicensee";

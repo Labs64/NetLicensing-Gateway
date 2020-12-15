@@ -14,7 +14,7 @@ public class TimeStampTracker {
     @Autowired
     private TimeStampRepository timeStampRepository;
 
-    public boolean isTimeOutExpired(final String tsTag, final int timeOutMinutes) {
+    public boolean isExpired(final String tsTag, final int timeOutMinutes) {
         TimeStamp nextCheckTS = timeStampRepository.findById(tsTag).orElse(null);
         final Calendar now = Calendar.getInstance();
         final boolean expired = (nextCheckTS == null) || (now.getTime().after(nextCheckTS.getTimestamp()));

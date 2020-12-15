@@ -71,8 +71,7 @@ public class MyCommerceController extends AbstractBaseController {
             @QueryParam(MyCommerce.MyCommerceConstants.PURCHASE_ID) final String purchaseId) {
         try {
             final Context context = getSecurityHelper().getContext();
-            return myCommerce.getErrorLog(context, productNumber, purchaseId,
-                    MyCommerce.MyCommerceConstants.PURCHASE_ID);
+            return myCommerce.getErrorLog(context, productNumber, purchaseId, MyCommerce.MyCommerceConstants.PURCHASE_ID);
         } catch (final Exception e) {
             throw new BaseException(e.getMessage());
         }

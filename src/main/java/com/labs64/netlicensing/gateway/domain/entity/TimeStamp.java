@@ -14,7 +14,7 @@ import javax.persistence.TemporalType;
  * Represents database licensee property entity.
  */
 @Entity
-@Table(name = "TIMSTAMPS")
+@Table(name = "TIMESTAMPS")
 public class TimeStamp implements Serializable {
 
     private static final long serialVersionUID = 642517696016632591L;

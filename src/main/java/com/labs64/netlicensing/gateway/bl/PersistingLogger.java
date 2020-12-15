@@ -14,8 +14,6 @@ import com.labs64.netlicensing.gateway.domain.entity.StoredLog;
 import com.labs64.netlicensing.gateway.domain.repositories.LogRepository;
 import com.labs64.netlicensing.gateway.util.Constants;
 
-// TODO(2K): turn into sink for slf4j
-
 @Component
 public class PersistingLogger {
 
@@ -54,9 +52,9 @@ public class PersistingLogger {
         requestResponse.setTimestamp(new Date());
         logRepository.save(requestResponse);
 
-        if (timeStampTracker.isTimeOutExpired(Constants.LOG_NEXT_CLEANUP_TAG, Constants.CLEANUP_PERIOD_MINUTES)) {
+        if (timeStampTracker.isExpired(Constants.NEXT_CLEANUP_LOGGING_TAG, Constants.CLEANUP_PERIOD_MINUTES)) {
             final Calendar earliestPersistTime = Calendar.getInstance();
-            earliestPersistTime.add(Calendar.DAY_OF_MONTH, -Constants.LOG_PERSIST_DAYS);
+            earliestPersistTime.add(Calendar.DAY_OF_MONTH, Constants.LOG_PERSIST_DAYS * -1);
             logRepository.deleteByTimestampBefore(earliestPersistTime.getTime());
         }
     }

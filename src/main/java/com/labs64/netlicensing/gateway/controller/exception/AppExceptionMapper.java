@@ -47,7 +47,7 @@ public class AppExceptionMapper implements ExceptionMapper<Throwable> {
      */
     private Status mapStatus(final Throwable exception) {
         final Status status = Response.Status.BAD_REQUEST;
-        // TODO
+        // TODO: map errors status
         return status;
     }
 }

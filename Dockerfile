@@ -9,3 +9,5 @@ FROM tomcat:9.0-jdk11
 COPY --from=builder /opt/gateway/target/gateway.war /usr/local/tomcat/webapps/
 
 EXPOSE 8080/tcp
+EXPOSE 8082/tcp
+EXPOSE 9092/tcp

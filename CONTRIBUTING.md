@@ -64,3 +64,15 @@ To verify whether your local development environment is up and running open foll
 
 - **gateway:** http://localhost:8080/gateway/monitoring
 - **ngrok:** https://[ngrok-subdomain].ngrok.io/gateway/monitoring (Note: `ngrok-subdomain` will be different upon every environment start)
+
+### Database connect
+
+*NOTE:* Database available in the `Development` mode only (see POM profile and web.xml configuration).
+
+You can access H2 web console with your web browser at [localhost:8082](http://localhost:8082) with the following settings:
+
+- **JDBC URL:** `jdbc:h2:mem:dataSource`
+- **User Name:** `sa`
+- **Password:** `<EMPTY>`
+
+... or access port 9092 with an external SQL client.
