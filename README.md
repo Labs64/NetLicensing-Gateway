@@ -65,7 +65,7 @@ Verify container configuration by opening monitoring endpoint at [http://localho
 
 #### Connectors tests
 
-Refer to the eCommerce connectors [setup and configuration guides](https://github.com/Labs64/NetLicensing-Gateway/wiki).
+Refer to the eCommerce connectors [setup and configuration guides](https://netlicensing.io/wiki/gateway#connectors).
 
 ## Contributors
 
