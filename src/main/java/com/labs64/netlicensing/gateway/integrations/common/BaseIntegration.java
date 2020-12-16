@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.ws.rs.core.MultivaluedMap;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.slf4j.Logger;
@@ -35,7 +36,7 @@ public abstract class BaseIntegration {
 
         List<StoredLog> logs;
 
-        if (secondKey != null && !secondKey.isEmpty()) {
+        if (StringUtils.isNotBlank(secondKey)) {
             logs = persistingLogger.getLogsByKeyAndSecondaryKey(productNumber, secondKey);
         } else {
             logs = persistingLogger.getLogsByKey(productNumber);
@@ -46,7 +47,7 @@ public abstract class BaseIntegration {
             logStringBuilder.append(Constants.NetLicensing.PRODUCT_NUMBER);
             logStringBuilder.append("=");
             logStringBuilder.append(productNumber);
-            if (secondKey != null && !secondKey.isEmpty()) {
+            if (StringUtils.isNotBlank(secondKey)) {
                 logStringBuilder.append(" and ");
                 logStringBuilder.append(secondKeyName);
                 logStringBuilder.append("=");
