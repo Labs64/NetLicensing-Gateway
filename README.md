@@ -18,7 +18,7 @@ After a successful transaction, all needed licensing configuration (Customers, L
 There are various ways available on how to enable NetLicensing Gateway in your licensing flow:
 
 - Centrally hosted instance available at [gateway.netlicensing.io](https://gateway.netlicensing.io/monitoring)
-- Your individual instance from Docker image (check [Docker](#docker) and [Docker Compose](#docker-compose) instructions below)
+- Your individual instance from Docker image (check instructions below and in the [contributing instructions](CONTRIBUTING.md))
 
 ### Docker
 
@@ -34,29 +34,6 @@ $ docker pull labs64/netlicensing-gateway
 $ docker container run -d -it --publish 8080:8080 --name netlicensing-gateway labs64/netlicensing-gateway
 ```
 
-### Docker Compose
-
-Additionally to the main NetLicensing Gateway instance, Docker Compose  includes various helper tools needed for local testing and eCommerce connectors development:
-
-- [Ngrok](https://ngrok.com) - expose local NetLicensing Gateway endpoints as public URLs, to allow eCommerce fulfilment webhook tests.
-
-#### Clone repository
-
-```
-$ git clone https://github.com/Labs64/NetLicensing-Gateway.git
-```
-
-#### Start containers
-```
-$ docker-compose up -d
-```
-
-#### Stop containers
-
-```
-$ docker-compose down
-```
-
 ### Test configuration
 
 #### Sanity check
@@ -69,7 +46,7 @@ Refer to the eCommerce connectors [setup and configuration guides](https://netli
 
 ## Contributors
 
-New connectors' integrations as community implementation are highly appreciated and welcome.
+New integrations (eCommerce connectors) as community implementation are highly appreciated and welcome.
 Please refer to the [contributing instructions](CONTRIBUTING.md).
 
 ## Bugs and Feedback
@@ -82,7 +59,6 @@ NetLicensing Gateway is open-source software licensed under the [Apache 2.0](LIC
 
 ## Links
 
-- [Labs64 @ Docker Hub](https://hub.docker.com/u/labs64)
 - NetLicensing Gateway [Docker image](https://hub.docker.com/r/labs64/netlicensing-gateway)
 - NetLicensing [Integrations](https://netlicensing.io/wiki/integrations)
 - NetLicensing [RESTful API](https://netlicensing.io/wiki/restful-api)

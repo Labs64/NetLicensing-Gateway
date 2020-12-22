@@ -44,6 +44,10 @@ $ docker container run -d -it -v $(pwd)/dockerfiles/conf/tomcat-users.xml:/usr/l
 
 ### Docker Compose (Tomcat + ngrok)
 
+Additionally to the main NetLicensing Gateway instance, Docker Compose  includes various helper tools needed for local testing and eCommerce connectors development:
+
+- [Ngrok](https://ngrok.com) - expose local NetLicensing Gateway endpoints as public URLs, to allow eCommerce fulfilment webhook tests.
+
 #### Start environment
 
 ```
