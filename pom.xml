@@ -27,8 +27,8 @@
 
     <scm>
         <url>https://github.com/Labs64/NetLicensing-Gateway</url>
-        <connection>scm:git:git@github.com:Labs64/NetLicensing-Gateway.git</connection>
-        <developerConnection>scm:git:git@github.com:Labs64/NetLicensing-Gateway.git</developerConnection>
+        <connection>scm:git:https://github.com/Labs64/NetLicensing-Gateway.git</connection>
+        <developerConnection>scm:git:https://github.com/Labs64/NetLicensing-Gateway.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
