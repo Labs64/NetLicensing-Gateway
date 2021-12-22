@@ -12,8 +12,8 @@ import java.util.TreeSet;
 import javax.ws.rs.core.MultivaluedMap;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.springframework.stereotype.Component;
 
 import com.labs64.netlicensing.domain.entity.LicenseTemplate;
@@ -47,7 +47,7 @@ public class FastSpring extends BaseIntegration {
         static final String LICENSE_TEMPLATE_LIST = "licenseTemplateList";
     }
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FastSpring.class);
+    private static final Logger LOGGER = LogManager.getLogger(FastSpring.class);
 
     public String codeGenerator(final Context context, final String reference, final String productNumber,
             final List<String> licenseTemplateList, final boolean quantityToLicensee, final boolean isSaveUserData,

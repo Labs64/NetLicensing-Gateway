@@ -9,8 +9,8 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import com.labs64.netlicensing.exception.ConversionException;
 
@@ -18,7 +18,7 @@ import com.labs64.netlicensing.exception.ConversionException;
 @Produces({ MediaType.TEXT_PLAIN })
 public class AppExceptionMapper implements ExceptionMapper<Throwable> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AppExceptionMapper.class);
+    private static final Logger LOGGER = LogManager.getLogger(AppExceptionMapper.class);
 
     @Override
     public Response toResponse(final Throwable exception) {
