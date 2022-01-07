@@ -62,9 +62,9 @@
         <spring-security.framework.version>5.6.1</spring-security.framework.version>
         <spring-data-jpa.framework.version>2.6.0</spring-data-jpa.framework.version>
         <jersey.version>2.32</jersey.version>
-        <log4j.version>2.17.0</log4j.version>
+        <log4j.version>2.17.1</log4j.version>
         <junit.version>4.13.2</junit.version>
-        <h2database.version>2.0.204</h2database.version>
+        <h2database.version>2.0.206</h2database.version>
         <eclipselink.version>2.7.7</eclipselink.version>
         <json-simple.version>1.1.1</json-simple.version>
 
