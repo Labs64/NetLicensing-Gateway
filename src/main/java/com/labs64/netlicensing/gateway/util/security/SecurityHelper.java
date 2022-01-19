@@ -20,7 +20,7 @@ public final class SecurityHelper {
     private String nlicMonitoringUser;
     private String nlicMonitoringPass;
 
-    public class GWClientConfiguration implements RestProvider.Configuration {
+    public static class GWClientConfiguration implements RestProvider.Configuration {
 
         @Override
         public String getUserAgent() {
