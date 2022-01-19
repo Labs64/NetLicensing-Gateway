@@ -35,6 +35,7 @@ public class MonitoringController extends AbstractBaseController {
     public String monitoring() {
         checkNetLicensingAvailability();
         checkDatabaseAvailability();
+        LOGGER.debug("{} v{} is up and running.", projectName, projectVersion);
         return projectName + " v" + projectVersion + " is up and running.";
     }
 
@@ -43,7 +44,7 @@ public class MonitoringController extends AbstractBaseController {
             final Context context = getSecurityHelper().getMonitoringContext();
             UtilityService.listLicenseTypes(context);
         } catch (final Exception e) {
-            LOGGER.error("Monitoring: NetLicensing Error: " + e.getMessage());
+            LOGGER.error("Monitoring: NetLicensing Error", e);
             throw new MonitoringException("NetLicensing is not reachable.");
         }
     }
@@ -52,7 +53,7 @@ public class MonitoringController extends AbstractBaseController {
         try {
             timeStampRepository.count();
         } catch (final Exception e) {
-            LOGGER.error("Monitoring: Database Error: " + e.getMessage());
+            LOGGER.error("Monitoring: Database Error", e);
             throw new MonitoringException("Database unavailable");
         }
     }

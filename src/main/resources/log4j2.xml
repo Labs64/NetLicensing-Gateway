@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+
+    <Appenders>
+        <Console name="gateway-console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d [%p] %m%n"/>
+        </Console>
+    </Appenders>
+
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="gateway-console"/>
+        </Root>
+    </Loggers>
+
+</Configuration>
