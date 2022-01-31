@@ -56,6 +56,7 @@
 
         <!-- dependency.version>0.0.0</dependency.version -->
         <netlicensing-client.version>2.9.2</netlicensing-client.version>
+        <labs64.code-analysis.version>2.0.0</labs64.code-analysis.version>
         <commons-lang3.version>3.12.0</commons-lang3.version>
         <commons-collections4.version>4.4</commons-collections4.version>
         <commons-codec.version>1.10</commons-codec.version>
@@ -324,7 +325,7 @@
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <version>${maven-checkstyle-plugin.version}</version>
                 <configuration>
-                    <configLocation>${project.build.directory}/classes/checkstyle.xml</configLocation>
+                    <configLocation>labs64-rulesets/checkstyle.xml</configLocation>
                     <failsOnError>false</failsOnError>
                 </configuration>
                 <executions>
@@ -336,6 +337,13 @@
                         </goals>
                     </execution>
                 </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.labs64.commons</groupId>
+                        <artifactId>code-analysis</artifactId>
+                        <version>${labs64.code-analysis.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
 
             <!-- https://spotbugs.github.io -->
@@ -344,7 +352,7 @@
                 <artifactId>spotbugs-maven-plugin</artifactId>
                 <version>${spotbugs-maven-plugin.version}</version>
                 <configuration>
-                    <includeFilterFile>${project.build.directory}/classes/spotbugs.xml</includeFilterFile>
+                    <includeFilterFile>labs64-rulesets/spotbugs.xml</includeFilterFile>
                     <failOnError>false</failOnError>
                 </configuration>
                 <executions>
@@ -356,6 +364,13 @@
                         </goals>
                     </execution>
                 </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.labs64.commons</groupId>
+                        <artifactId>code-analysis</artifactId>
+                        <version>${labs64.code-analysis.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
 
             <!-- https://maven.apache.org/plugins/maven-pmd-plugin/usage.html -->
@@ -365,9 +380,10 @@
                 <version>${maven-pmd-plugin.version}</version>
                 <configuration>
                     <rulesets>
-                        <ruleset>${project.build.directory}/classes/pmd.xml</ruleset>
+                        <ruleset>labs64-rulesets/pmd.xml</ruleset>
                     </rulesets>
                     <failOnViolation>false</failOnViolation>
+                    <printFailingErrors>true</printFailingErrors>
                 </configuration>
                 <executions>
                     <execution>
@@ -378,6 +394,13 @@
                         </goals>
                     </execution>
                 </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.labs64.commons</groupId>
+                        <artifactId>code-analysis</artifactId>
+                        <version>${labs64.code-analysis.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
 
             <plugin>
@@ -428,65 +451,6 @@
                 </excludes>
             </resource>
         </resources>
-
-        <pluginManagement>
-            <plugins>
-                <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
-                <plugin>
-                    <groupId>org.eclipse.m2e</groupId>
-                    <artifactId>lifecycle-mapping</artifactId>
-                    <version>1.0.0</version>
-                    <configuration>
-                        <lifecycleMappingMetadata>
-                            <pluginExecutions>
-                                <pluginExecution>
-                                    <pluginExecutionFilter>
-                                        <groupId>
-                                            org.codehaus.mojo
-                                        </groupId>
-                                        <artifactId>
-                                            build-helper-maven-plugin
-                                        </artifactId>
-                                        <versionRange>
-                                            [1.12,)
-                                        </versionRange>
-                                        <goals>
-                                            <goal>
-                                                timestamp-property
-                                            </goal>
-                                        </goals>
-                                    </pluginExecutionFilter>
-                                    <action>
-                                        <ignore />
-                                    </action>
-                                </pluginExecution>
-                                <pluginExecution>
-                                    <pluginExecutionFilter>
-                                        <groupId>
-                                            org.codehaus.mojo
-                                        </groupId>
-                                        <artifactId>
-                                            license-maven-plugin
-                                        </artifactId>
-                                        <versionRange>
-                                            [1.8,)
-                                        </versionRange>
-                                        <goals>
-                                            <goal>
-                                                download-licenses
-                                            </goal>
-                                        </goals>
-                                    </pluginExecutionFilter>
-                                    <action>
-                                        <ignore />
-                                    </action>
-                                </pluginExecution>
-                            </pluginExecutions>
-                        </lifecycleMappingMetadata>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
     </build>
 
     <repositories>
