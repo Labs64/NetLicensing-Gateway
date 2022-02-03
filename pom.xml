@@ -56,7 +56,6 @@
 
         <!-- dependency.version>0.0.0</dependency.version -->
         <netlicensing-client.version>2.9.2</netlicensing-client.version>
-        <labs64.code-analysis.version>2.0.1</labs64.code-analysis.version>
         <commons-lang3.version>3.12.0</commons-lang3.version>
         <commons-collections4.version>4.4</commons-collections4.version>
         <commons-codec.version>1.10</commons-codec.version>
@@ -81,7 +80,9 @@
         <build-helper-maven-plugin.version>3.2.0</build-helper-maven-plugin.version>
         <license-maven-plugin.version>2.0.0</license-maven-plugin.version>
         <!-- Code Analysis -->
+        <labs64.code-analysis.version>2.0.1</labs64.code-analysis.version>
         <labs64.code-analysis.phase>site</labs64.code-analysis.phase>
+        <labs64.code-analysis.failOnViolation>false</labs64.code-analysis.failOnViolation>
         <maven-checkstyle-plugin.version>3.1.2</maven-checkstyle-plugin.version>
         <spotbugs-maven-plugin.version>4.5.3.0</spotbugs-maven-plugin.version>
         <maven-pmd-plugin.version>3.15.0</maven-pmd-plugin.version>
@@ -328,7 +329,7 @@
                 <version>${maven-checkstyle-plugin.version}</version>
                 <configuration>
                     <configLocation>labs64-code-analysis/checkstyle.xml</configLocation>
-                    <failsOnError>false</failsOnError>
+                    <failsOnError>${labs64.code-analysis.failOnViolation}</failsOnError>
                 </configuration>
                 <executions>
                     <execution>
@@ -355,7 +356,7 @@
                 <version>${spotbugs-maven-plugin.version}</version>
                 <configuration>
                     <includeFilterFile>labs64-code-analysis/spotbugs.xml</includeFilterFile>
-                    <failOnError>false</failOnError>
+                    <failOnError>${labs64.code-analysis.failOnViolation}</failOnError>
                 </configuration>
                 <executions>
                     <execution>
@@ -384,7 +385,7 @@
                     <rulesets>
                         <ruleset>labs64-code-analysis/pmd.xml</ruleset>
                     </rulesets>
-                    <failOnViolation>false</failOnViolation>
+                    <failOnViolation>${labs64.code-analysis.failOnViolation}</failOnViolation>
                     <printFailingErrors>true</printFailingErrors>
                 </configuration>
                 <executions>
