@@ -1,6 +1,5 @@
 package com.labs64.netlicensing.gateway.util.security;
 
-import org.springframework.beans.factory.annotation.Required;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,9 +15,9 @@ import com.labs64.netlicensing.service.UtilityService;
  */
 public final class SecurityHelper {
 
-    private String nlicBaseUrl;
-    private String nlicMonitoringUser;
-    private String nlicMonitoringPass;
+    private final String nlicBaseUrl;
+    private final String nlicMonitoringUser;
+    private final String nlicMonitoringPass;
 
     public static class GWClientConfiguration implements RestProvider.Configuration {
 
@@ -34,18 +33,9 @@ public final class SecurityHelper {
 
     }
 
-    @Required
-    public void setNlicBaseUrl(final String nlicBaseUrl) {
+    public SecurityHelper(final String nlicBaseUrl, final String nlicMonitoringUser, final String nlicMonitoringPass) {
         this.nlicBaseUrl = nlicBaseUrl;
-    }
-
-    @Required
-    public void setNlicMonitoringUser(final String nlicMonitoringUser) {
         this.nlicMonitoringUser = nlicMonitoringUser;
-    }
-
-    @Required
-    public void setNlicMonitoringPass(final String nlicMonitoringPass) {
         this.nlicMonitoringPass = nlicMonitoringPass;
     }
 
@@ -82,7 +72,7 @@ public final class SecurityHelper {
     public static boolean checkContextConnection(final Context context) {
         try {
             UtilityService.listLicenseTypes(context);
-        } catch (NetLicensingException e) {
+        } catch (final NetLicensingException e) {
             return false;
         }
         return true;

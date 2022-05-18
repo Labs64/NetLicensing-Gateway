@@ -17,8 +17,6 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "MY_COMMERCE_PURCHASES")
 public class MyCommercePurchase extends AbstractPersistable<String> {
 
-    private static final long serialVersionUID = 6805624114204054433L;
-
     public MyCommercePurchase() {
     }
 

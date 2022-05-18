@@ -14,8 +14,6 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "LOGGING")
 public class StoredLog extends AbstractPersistable<String> {
 
-    private static final long serialVersionUID = -8835218729902563568L;
-
     public enum Severity {
         INFO, WARNING, ERROR
     }

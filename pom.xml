@@ -56,9 +56,7 @@
 
         <!-- dependency.version>0.0.0</dependency.version -->
         <netlicensing-client.version>2.9.2</netlicensing-client.version>
-        <commons-lang3.version>3.12.0</commons-lang3.version>
-        <commons-collections4.version>4.4</commons-collections4.version>
-        <commons-codec.version>1.10</commons-codec.version>
+        <commons-text.version>1.9</commons-text.version>
         <spring.framework.version>5.3.15</spring.framework.version>
         <spring-security.framework.version>5.6.1</spring-security.framework.version>
         <spring-data-jpa.framework.version>2.6.1</spring-data-jpa.framework.version>
@@ -74,6 +72,7 @@
         <maven-enforcer-plugin.version>3.0.0-M3</maven-enforcer-plugin.version>
         <maven-war-plugin.version>3.3.1</maven-war-plugin.version>
         <maven-site-plugin.version>3.9.1</maven-site-plugin.version>
+        <maven-javadoc-plugin.version>3.4.0</maven-javadoc-plugin.version>
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
         <maven-release-plugin.version>3.0.0-M1</maven-release-plugin.version>
         <maven-resources-plugin.version>3.2.0</maven-resources-plugin.version>
@@ -87,10 +86,6 @@
         <spotbugs-maven-plugin.version>4.5.3.0</spotbugs-maven-plugin.version>
         <maven-pmd-plugin.version>3.15.0</maven-pmd-plugin.version>
     </properties>
-
-    <prerequisites>
-        <maven>${maven.version}</maven>
-    </prerequisites>
 
     <dependencies>
         <!-- NetLicensing Client -->
@@ -203,6 +198,12 @@
             <version>${jersey.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+            <version>${commons-text.version}</version>
+            <scope>test</scope>
+        </dependency>
 
     </dependencies>
 
@@ -273,6 +274,9 @@
                     <source>${java.version}</source>
                     <target>${java.version}</target>
                     <encoding>UTF-8</encoding>
+                    <compilerArgs>
+                        <arg>-Xlint:all</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
             <plugin>
@@ -317,8 +321,9 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${maven-javadoc-plugin.version}</version>
                 <configuration>
-                    <source>11</source>
+                    <source>${java.version}</source>
                 </configuration>
             </plugin>
 
@@ -410,6 +415,9 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>${maven-resources-plugin.version}</version>
+                <configuration>
+                    <propertiesEncoding>UTF-8</propertiesEncoding>
+                </configuration>
             </plugin>
 
             <plugin>
@@ -432,6 +440,7 @@
                     <licensesOutputFile>
                         ${project.build.directory}/${project.build.finalName}/licenses/licenses.xml
                     </licensesOutputFile>
+                    <errorRemedy>ignore</errorRemedy>
                 </configuration>
             </plugin>
         </plugins>

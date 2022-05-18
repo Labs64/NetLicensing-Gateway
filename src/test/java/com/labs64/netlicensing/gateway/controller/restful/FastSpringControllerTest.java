@@ -12,15 +12,9 @@
  */
 package com.labs64.netlicensing.gateway.controller.restful;
 
-import org.junit.Rule;
-import org.junit.rules.ExpectedException;
-
 import com.labs64.netlicensing.gateway.integrations.fastspring.FastSpringController;
 
 public class FastSpringControllerTest extends BaseControllerTest {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     @Override
     protected Class<?> getResourceClass() {
