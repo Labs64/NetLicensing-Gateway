@@ -14,6 +14,7 @@
 package com.labs64.netlicensing.gateway.controller.restful;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +33,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.text.WordUtils;
+import org.apache.commons.text.WordUtils;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.glassfish.jersey.test.TestProperties;
@@ -156,7 +157,7 @@ abstract class BaseControllerTest extends JerseyTest {
             for (final String paramKey : formParams.keySet()) {
                 final Property property = SchemaFunction.propertyByName(properties, paramKey);
                 final String paramValue = formParams.getFirst(paramKey);
-                if (paramValue != null && paramValue.trim().equals("")) {
+                if ((paramValue != null) && paramValue.trim().equals("")) {
                     properties.remove(property);
                 } else {
                     if (!properties.contains(property)) {
@@ -202,7 +203,7 @@ abstract class BaseControllerTest extends JerseyTest {
             item.setType(WordUtils.capitalize(serviceId));
             netlicensing.getItems().getItem().add(item);
 
-            final Map<String, String> propertyValues = new HashMap<String, String>(defaultPropertyValues);
+            final Map<String, String> propertyValues = new HashMap<>(defaultPropertyValues);
             for (final String paramKey : formParams.keySet()) {
                 propertyValues.put(paramKey, formParams.getFirst(paramKey));
             }
@@ -239,7 +240,7 @@ abstract class BaseControllerTest extends JerseyTest {
             }
 
             // for testing purposes parameter "forceCascade" for "existing" entities should always be true if not absent
-            final boolean hasForceCascade = queryParams != null && queryParams.containsKey(Constants.CASCADE);
+            final boolean hasForceCascade = (queryParams != null) && queryParams.containsKey(Constants.CASCADE);
             if (hasForceCascade && !Boolean.valueOf(queryParams.getFirst(Constants.CASCADE))) {
                 return unexpectedValueErrorResponse(Constants.CASCADE);
             }
@@ -256,7 +257,7 @@ abstract class BaseControllerTest extends JerseyTest {
          * @return response object
          */
         protected final Response errorResponse(final String... errorIdsAndMessages) {
-            if (errorIdsAndMessages.length % 2 != 0) {
+            if ((errorIdsAndMessages.length % 2) != 0) {
                 throw new IllegalArgumentException("Some exception ID doesn't have corresponding error message");
             }
 
@@ -291,7 +292,7 @@ abstract class BaseControllerTest extends JerseyTest {
                 final String paramKey) {
             if (formParams.containsKey(paramKey)) {
                 final String priceStr = formParams.getFirst(paramKey);
-                final BigDecimal roundedPrice = new BigDecimal(priceStr).setScale(2, BigDecimal.ROUND_HALF_UP);
+                final BigDecimal roundedPrice = new BigDecimal(priceStr).setScale(2, RoundingMode.HALF_UP);
                 formParams.putSingle(paramKey, roundedPrice.toString());
             }
         }

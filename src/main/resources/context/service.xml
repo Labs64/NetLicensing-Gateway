@@ -6,9 +6,9 @@
     <!-- use versionless XSD: http://stackoverflow.com/questions/20894695/spring-configuration-xml-schema-with-or-without-version -->
 
     <bean id="securityHelper" class="com.labs64.netlicensing.gateway.util.security.SecurityHelper">
-        <property name="nlicBaseUrl" value="${nlic.base.url}" />
-        <property name="nlicMonitoringUser" value="${nlic.monitoring.user}" />
-        <property name="nlicMonitoringPass" value="${nlic.monitoring.pass}" />
+        <constructor-arg name="nlicBaseUrl" value="${nlic.base.url}" />
+        <constructor-arg name="nlicMonitoringUser" value="${nlic.monitoring.user}" />
+        <constructor-arg name="nlicMonitoringPass" value="${nlic.monitoring.pass}" />
     </bean>
     
     <bean id="exceptionMapper" class="com.labs64.netlicensing.gateway.controller.exception.AppExceptionMapper"
