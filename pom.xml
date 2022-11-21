@@ -56,7 +56,7 @@
 
         <!-- dependency.version>0.0.0</dependency.version -->
         <netlicensing-client.version>2.9.2</netlicensing-client.version>
-        <commons-text.version>1.9</commons-text.version>
+        <commons-text.version>1.10.0</commons-text.version>
         <spring.framework.version>5.3.15</spring.framework.version>
         <spring-security.framework.version>5.6.1</spring-security.framework.version>
         <spring-data-jpa.framework.version>2.6.1</spring-data-jpa.framework.version>
